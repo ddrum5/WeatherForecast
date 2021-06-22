@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "89842934181",
+    "firebase_url": "https://weatherforecast-dd802-default-rtdb.firebaseio.com",
+    "project_id": "weatherforecast-dd802",
+    "storage_bucket": "weatherforecast-dd802.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89842934181:android:566bb062816a7a7626484c",
+        "android_client_info": {
+          "package_name": "ddrum.weatherforecast"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "89842934181-2huv9gf4em3hnvk4hc5to2i5cucf09gp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDf_twe_YvTTwMhpeARj3pdbc-a4ba4Cr0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "89842934181-2huv9gf4em3hnvk4hc5to2i5cucf09gp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shadow"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:orientation="vertical">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="11:40"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/current_tvCityName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hải Phòng"
+                android:maxLines="2"
+                android:maxEms="4"
+                android:autoSizeMinTextSize="20sp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeStepGranularity="2sp"
+                android:textSize="25sp" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/current_icon_Weather"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:adjustViewBounds="true"
+            android:maxWidth="70dp"
+            android:src="@drawable/icon_sun" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/current_tv_Temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="32°"
+            android:textSize="40sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:orientation="vertical">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/current_tv_Description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nắng nhẹ"
+                android:textSize="12sp" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/current_tv_Temp_Min_Max"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="C:45° T:25°"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+</layout>
