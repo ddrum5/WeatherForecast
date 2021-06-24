@@ -52,8 +52,6 @@ public class UserWeather {
         this.coord = coord;
     }
 
-
-
     public static class Coord {
 
         private Double lat;

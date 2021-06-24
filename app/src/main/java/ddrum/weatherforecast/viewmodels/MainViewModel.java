@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import ddrum.weatherforecast.base.BaseViewModel;
-import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.models.CurrentWeather;
 import ddrum.weatherforecast.models.OneCallWeather;
 import ddrum.weatherforecast.models.UserWeather;
@@ -31,10 +30,9 @@ public class MainViewModel extends BaseViewModel {
 
 
     public MutableLiveData<HashMap<String, Object>> userWeather = new MutableLiveData<>();
-    public MutableLiveData<CurrentWeather> currentLocationWeather = new MutableLiveData<>();
+    public MutableLiveData<CurrentWeather> defaultWeather = new MutableLiveData<>(); //vi tr hien tai
     public MutableLiveData<List<CurrentWeather>> weatherList = new MutableLiveData<>();
     public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();
-    public MutableLiveData<OneCallWeather> detailWeather = new MutableLiveData<>();
     ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);
 
 
@@ -42,32 +40,34 @@ public class MainViewModel extends BaseViewModel {
     }
 
     //==============================================================================================
-    public void setCurrentLocationWeather(String lat, String lon) {
+    public void setDefaultWeather(String lat, String lon) {
         apiService.getWeatherByCoord(lat, lon).enqueue(new Callback<CurrentWeather>() {
             @Override
             public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
                 CurrentWeather currentWeather = response.body();
                 if (currentWeather != null) {
-                    currentLocationWeather.setValue(currentWeather);
+                    defaultWeather.setValue(currentWeather);
                 } else {
-                    currentLocationWeather.setValue(null);
+                    defaultWeather.setValue(null);
                 }
             }
+
             @Override
             public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                currentLocationWeather.setValue(null);
+                defaultWeather.setValue(null);
                 Log.e("hay", "onFailure: ", t.getCause());
             }
         });
     }
 
     //==============================================================================================
-    public void setUserWeather( ) {
+    public void setUserWeather() {
         getRef().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
                 HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
                 userWeather.setValue(map);
+//                UserWeather userWeather = snapshot.getValue(UserWeather.class);
             }
 
             @Override
@@ -76,10 +76,56 @@ public class MainViewModel extends BaseViewModel {
             }
         });
     }
+
     //==============================================================================================
     public void addWeather(UserWeather.Coord coord) {
-        getRef().child(Constant.coord).push().setValue(coord);
+
     }
+
+    //==============================================================================================
+    public MutableLiveData<CurrentWeather> currentWeather = new MutableLiveData<>();
+//    public CurrentWeather getCurrentWeather(String cityName) {
+//        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
+//            @Override
+//            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+//                CurrentWeather weather = response.body();
+//                if (weather != null) {
+//                    currentWeather = weather;
+//                    return;
+//                }
+//            }
+//            @Override
+//            public void onFailure(Call<CurrentWeather> call, Throwable t) {
+//                currentWeather = null;
+//            }
+//        });
+//        return currentWeather;
+//    }
+    //==============================================================================================
+
+    public MutableLiveData<Boolean> checkCity= new MutableLiveData<>();
+    public void getCheckCityName(String cityName) {
+        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
+            @Override
+            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+                CurrentWeather weather = response.body();
+                if (weather != null) {
+                    checkCity.setValue(true);
+                    currentWeather.setValue(weather);
+                }else {
+                    checkCity.setValue(false);
+                    currentWeather.setValue(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<CurrentWeather> call, Throwable t) {
+                checkCity.setValue(false);
+                currentWeather.setValue(null);
+            }
+        });
+
+    }
+
     //==============================================================================================
     public void setOneCallWeather(String lat, String lon) {
         apiService.getOneCallWeather(lat, lon).enqueue(new Callback<OneCallWeather>() {
@@ -92,6 +138,7 @@ public class MainViewModel extends BaseViewModel {
                     oneCallWeather.setValue(null);
                 }
             }
+
             @Override
             public void onFailure(Call<OneCallWeather> call, Throwable t) {
                 Log.e("hay", "onFailure: ", t.getCause());
@@ -99,10 +146,12 @@ public class MainViewModel extends BaseViewModel {
         });
     }
     //==============================================================================================
-    public void updateWeatherList(List<CurrentWeather> list){
+
+    //==============================================================================================
+    public void updateWeatherList(List<CurrentWeather> list) {
         weatherList.setValue(list);
     }
 
-
+    //==============================================================================================
 
 }

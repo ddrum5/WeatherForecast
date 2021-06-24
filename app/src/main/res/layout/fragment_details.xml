@@ -57,10 +57,10 @@
                 android:textSize="50dp" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/current_tv_Temp_Min_Max"
+                android:id="@+id/current_tv_feels_like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="C:45°  T:25°"
+                android:text="Cảm giác như 48°"
                 android:textSize="20sp" />
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_add_to_list"

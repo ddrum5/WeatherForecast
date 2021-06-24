@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
@@ -16,13 +17,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentHomeBinding;
-import ddrum.weatherforecast.models.Constant;
+import ddrum.weatherforecast.models.CurrentWeather;
 import ddrum.weatherforecast.models.UserWeather;
+import ddrum.weatherforecast.ulti.Ulti;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
 import ddrum.weatherforecast.views.adapters.WeatherAdapter;
 
@@ -61,12 +62,11 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
                     @Override
                     public void onChanged(UserWeather.Coord coord) {
                         if (coord != null) {
-                            viewModel.setCurrentLocationWeather(coord.getLat().toString(), coord.getLon().toString());
+                            viewModel.setDefaultWeather(coord.getLat().toString(), coord.getLon().toString());
                         }
                     }
                 });
 
-                upload();
                 binding.currentWeather.time.setText(getCurrentTime());
                 Snackbar.make(getView(), "Đã cập nhật lúc " + getCurrentTime(), Snackbar.LENGTH_SHORT).show();
 
@@ -77,16 +77,32 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
 
     private void binding() {
-        viewModel.currentLocation.observe(this, coord -> {
-            if (coord != null) {
-                viewModel.setCurrentLocationWeather(coord.getLat().toString(), coord.getLon().toString());
+        viewModel.defaultWeather.observe(this, new Observer<CurrentWeather>() {
+            @Override
+            public void onChanged(CurrentWeather currentWeather) {
+                String cityName = currentWeather.getName();
+                String description = currentWeather.getWeather().get(0).getDescription();
+                String temp = Math.round(currentWeather.getMain().getTemp()) + getString(R.string.tempUnit);
+                String tempMinMax = "t:" + Math.round(currentWeather.getMain().getTempMin())
+                        + " c:" + Math.round(currentWeather.getMain().getTempMax());
+                String iconUrl = "http://openweathermap.org/img/wn/" + currentWeather.getWeather().get(0).getIcon() + "@2x.png";
+
+                binding.currentWeather.currentTvCityName.setText(cityName);
+                binding.currentWeather.currentTvDescription.setText(description);
+                binding.currentWeather.currentTvTemp.setText(temp);
+                binding.currentWeather.currentTvTempMinMax.setText(tempMinMax);
+                binding.currentWeather.time.setText(Ulti.getCurrentTime());
+                Glide.with(getActivity()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
             }
         });
+
+
         viewModel.weatherList.observe(this, list -> {
             if (list != null) {
                 adapter.updateData(list);
             }
         });
+
         viewModel.userWeather.observe(this, new Observer<HashMap<String, Object>>() {
             @Override
             public void onChanged(HashMap<String, Object> map) {
@@ -97,16 +113,12 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
     }
 
+
     public void initInstance() {
         adapter = new WeatherAdapter(getContext());
         binding.rcv.setAdapter(adapter);
 
     }
-
-
-    public void upload() {
-    }
-
 
     private void searchBarEvent() {
         binding.searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
@@ -116,14 +128,30 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
             @Override
             public void onSearchConfirmed(CharSequence text) {
-                Bundle bundle = new Bundle();
-                bundle.putString("cityName", text.toString());
-                navigateTo(R.id.detailsFragment2, bundle);
+                viewModel.getCheckCityName(text.toString());
+                viewModel.checkCity.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+                    @Override
+                    public void onChanged(Boolean aBoolean) {
+                        if (aBoolean != null) {
+                            if (!aBoolean){
+                                longSnackBar("Không tìm thấy thành phố");
+
+                            } else {
+                                Bundle bundle = new Bundle();
+                                bundle.putString("cityName", text.toString());
+                                navigateTo(R.id.detailsFragment2, bundle);
+                            }
+                            viewModel.checkCity.setValue(null);
+                            return;
+                        }
+                    }
+                });
 
             }
 
             @Override
             public void onButtonClicked(int buttonCode) {
+
             }
         });
 

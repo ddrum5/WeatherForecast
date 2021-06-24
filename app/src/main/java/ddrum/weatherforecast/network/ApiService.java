@@ -18,7 +18,7 @@ public interface ApiService {
     String API_KEY = "4a51b76ea653415bb41003f2381a167a";
 
     @GET("/data/2.5/weather?units=metric&lang=vi&appid=" + API_KEY)
-    Call<CurrentWeather> getWeatherByCityName(@Query(value = "q", encoded = true) String cityName);
+    Call<CurrentWeather> getWeatherByCityName(@Query(value = "q", encoded = false) String cityName);
 
     @GET("/data/2.5/weather?units=metric&lang=vi&appid=" + API_KEY)
     Call<CurrentWeather> getWeatherByCoord(@Query(value = "lat") String lat, @Query(value = "lon") String lon);
