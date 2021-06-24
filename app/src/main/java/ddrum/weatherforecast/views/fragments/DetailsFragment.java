@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.view.View;
+import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,6 +30,9 @@ public class DetailsFragment extends BaseFragment<MainViewModel,FragmentDetailsB
 
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        String cityName = getArguments().getString("cityName");
+        Toast.makeText(getContext(), cityName, Toast.LENGTH_LONG).show();
+
 
     }
 

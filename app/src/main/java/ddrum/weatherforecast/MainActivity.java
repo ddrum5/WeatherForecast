@@ -16,7 +16,7 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
 
 
     @Override
-    protected int getLayout() {
+    protected int getLayout(){
         return R.layout.activity_main;
     }
 
@@ -25,12 +25,13 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
         return new MainViewModel();
     }
 
-
     @Override
     protected void initView(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        viewModel.initUser();
         NavController navController = Navigation.findNavController(this, R.id.nav_host);
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
         event();
+
     }
 
     private void event() {

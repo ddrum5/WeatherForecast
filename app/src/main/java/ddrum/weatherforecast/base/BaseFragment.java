@@ -1,23 +1,20 @@
 package ddrum.weatherforecast.base;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -25,18 +22,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 
-import ddrum.weatherforecast.Ultis.Ulti;
+import ddrum.weatherforecast.models.UserWeather;
 
 public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataBinding> extends Fragment {
 
     protected abstract int getLayout();
+
     protected abstract VM getViewModel();
 
     protected abstract void initView(@NonNull @NotNull View view, @Nullable Bundle savedInstanceState);
-    protected void initObserve() {}
+
+    protected void initObserve() {
+    }
 
     protected B binding;
     protected VM viewModel;
+
     @Nullable
     @org.jetbrains.annotations.Nullable
     @Override
@@ -56,26 +57,33 @@ public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataB
     protected void navigateTo(@IdRes int actionId) {
         NavHostFragment.findNavController(this).navigate(actionId);
     }
+    protected void navigateTo(@IdRes int actionId, Bundle bundle) {
+        NavHostFragment.findNavController(this).navigate(actionId,bundle);
+    }
 
     protected void popBackStack() {
         NavHostFragment.findNavController(this).popBackStack();
     }
 
-    protected String convertTimestamp(int timestamp){
+    protected String convertTimestamp(int timestamp) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-        return simpleDateFormat.format((long)timestamp* 1000L);
+        return simpleDateFormat.format( timestamp * 1000L);
     }
 
-    protected  String getCurrentTime(){
+    protected String getCurrentTime() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         return simpleDateFormat.format(System.currentTimeMillis());
     }
-    protected void shortSnackBar(String text){
+
+    protected void shortSnackBar(String text) {
         Snackbar.make(getView(), text, Snackbar.LENGTH_SHORT).show();
     }
-    protected void longSnackBar(String text){
+
+    protected void longSnackBar(String text) {
         Snackbar.make(getView(), text, Snackbar.LENGTH_LONG).show();
     }
+
+
 
 
 }

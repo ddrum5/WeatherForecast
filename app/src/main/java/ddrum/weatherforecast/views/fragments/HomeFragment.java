@@ -8,21 +8,28 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentSkipListMap;
+
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentHomeBinding;
-import ddrum.weatherforecast.models.CurrentWeather;
+import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.models.UserWeather;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
+import ddrum.weatherforecast.views.adapters.WeatherAdapter;
 
 public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBinding> {
 
+    WeatherAdapter adapter;
+    List<UserWeather.Coord> list = new ArrayList<>();
 
 
     @Override
@@ -37,66 +44,67 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        initInstance();
+        viewModel.init();
         searchBarEvent();
-        event();
         binding();
+        event();
+
+
     }
 
     private void event() {
-        viewModel.currentLocation.observe(requireActivity(), new Observer<UserWeather.Coord>() {
-            @Override
-            public void onChanged(UserWeather.Coord coord) {
-                if (coord != null) {
-                    viewModel.setCurrentWeather(coord.getLat().toString(), coord.getLon().toString());
-                }
-            }
-        });
         binding.swiperFresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                viewModel.currentLocation.observe(requireActivity(), new Observer<UserWeather.Coord>() {
+                viewModel.currentLocation.observe(getViewLifecycleOwner(), new Observer<UserWeather.Coord>() {
                     @Override
                     public void onChanged(UserWeather.Coord coord) {
                         if (coord != null) {
-                            viewModel.setCurrentWeather(coord.getLat().toString(), coord.getLon().toString());
+                            viewModel.setCurrentLocationWeather(coord.getLat().toString(), coord.getLon().toString());
                         }
                     }
                 });
+
+                upload();
                 binding.currentWeather.time.setText(getCurrentTime());
-                Snackbar.make(getView(), "Đã cập nhật lúc "+getCurrentTime(), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(getView(), "Đã cập nhật lúc " + getCurrentTime(), Snackbar.LENGTH_SHORT).show();
+
                 binding.swiperFresh.setRefreshing(false);
             }
         });
-
-
     }
 
 
     private void binding() {
-        viewModel.currentWeather.observe(this, new Observer<CurrentWeather>() {
+        viewModel.currentLocation.observe(this, coord -> {
+            if (coord != null) {
+                viewModel.setCurrentLocationWeather(coord.getLat().toString(), coord.getLon().toString());
+            }
+        });
+        viewModel.weatherList.observe(this, list -> {
+            if (list != null) {
+                adapter.updateData(list);
+            }
+        });
+        viewModel.userWeather.observe(this, new Observer<HashMap<String, Object>>() {
             @Override
-            public void onChanged(CurrentWeather currentWeather) {
-                if (currentWeather != null) {
+            public void onChanged(HashMap<String, Object> map) {
 
-                    String cityName = currentWeather.getName();
-                    String description = currentWeather.getWeather().get(0).getDescription();
-                    String temp = String.valueOf(Math.round(currentWeather.getMain().getTemp())) + getString(R.string.tempUnit);
-                    String tempMinMax = "t:" + String.valueOf(Math.round(currentWeather.getMain().getTempMin()))
-                            + " c:" + String.valueOf(Math.round(currentWeather.getMain().getTempMax()));
-                    String iconUrl = "http://openweathermap.org/img/wn/" + currentWeather.getWeather().get(0).getIcon() + "@2x.png";
-                    binding.currentWeather.currentTvCityName.setText(cityName);
-                    binding.currentWeather.currentTvDescription.setText(description);
-                    binding.currentWeather.currentTvTemp.setText(temp);
-                    binding.currentWeather.currentTvTempMinMax.setText(tempMinMax);
-                    binding.currentWeather.time.setText(getCurrentTime());
-                    Glide.with(requireActivity()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
-
-                } else {
-                    Snackbar.make(getView(), "Không có dữ liệu", Snackbar.LENGTH_LONG).show();
-                }
             }
         });
 
+
+    }
+
+    public void initInstance() {
+        adapter = new WeatherAdapter(getContext());
+        binding.rcv.setAdapter(adapter);
+
+    }
+
+
+    public void upload() {
     }
 
 
@@ -108,7 +116,10 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
             @Override
             public void onSearchConfirmed(CharSequence text) {
-                viewModel.setCurrentWeather(text.toString());
+                Bundle bundle = new Bundle();
+                bundle.putString("cityName", text.toString());
+                navigateTo(R.id.detailsFragment2, bundle);
+
             }
 
             @Override

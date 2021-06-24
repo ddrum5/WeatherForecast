@@ -12,10 +12,13 @@ import com.google.firebase.database.ValueEventListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 
 import ddrum.weatherforecast.base.BaseViewModel;
+import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.models.CurrentWeather;
 import ddrum.weatherforecast.models.OneCallWeather;
+import ddrum.weatherforecast.models.UserWeather;
 import ddrum.weatherforecast.network.ApiService;
 import ddrum.weatherforecast.network.RetrofitInstance;
 import retrofit2.Call;
@@ -26,51 +29,58 @@ import static android.content.ContentValues.TAG;
 
 public class MainViewModel extends BaseViewModel {
 
-    public MutableLiveData<HashMap<String,String>> userWeather = new MutableLiveData<>();
-    public MutableLiveData<CurrentWeather> currentWeather = new MutableLiveData<>();
+
+    public MutableLiveData<HashMap<String, Object>> userWeather = new MutableLiveData<>();
+    public MutableLiveData<CurrentWeather> currentLocationWeather = new MutableLiveData<>();
+    public MutableLiveData<List<CurrentWeather>> weatherList = new MutableLiveData<>();
     public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();
+    public MutableLiveData<OneCallWeather> detailWeather = new MutableLiveData<>();
     ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);
 
-    public void setCurrentWeather(String cityName) {
-        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
-            @Override
-            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-                CurrentWeather weather = response.body();
-                if (weather != null) {
-                    currentWeather.setValue(weather);
-                } else {
-                    currentWeather.setValue(null);
-                }
-            }
 
-            @Override
-            public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                currentWeather.setValue(null);
-                Log.e("hay", "onFailure: ", t.getCause());
-            }
-        });
+    public void init() {
     }
 
-    public void setCurrentWeather(String lat, String lon) {
+    //==============================================================================================
+    public void setCurrentLocationWeather(String lat, String lon) {
         apiService.getWeatherByCoord(lat, lon).enqueue(new Callback<CurrentWeather>() {
             @Override
             public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-                CurrentWeather weather = response.body();
-                if (weather != null) {
-                    currentWeather.setValue(weather);
+                CurrentWeather currentWeather = response.body();
+                if (currentWeather != null) {
+                    currentLocationWeather.setValue(currentWeather);
                 } else {
-                    currentWeather.setValue(null);
+                    currentLocationWeather.setValue(null);
                 }
             }
-
             @Override
             public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                currentWeather.setValue(null);
+                currentLocationWeather.setValue(null);
                 Log.e("hay", "onFailure: ", t.getCause());
             }
         });
     }
 
+    //==============================================================================================
+    public void setUserWeather( ) {
+        getRef().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
+                userWeather.setValue(map);
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+                Log.e(TAG, "onCancelled: " + error.getMessage());
+            }
+        });
+    }
+    //==============================================================================================
+    public void addWeather(UserWeather.Coord coord) {
+        getRef().child(Constant.coord).push().setValue(coord);
+    }
+    //==============================================================================================
     public void setOneCallWeather(String lat, String lon) {
         apiService.getOneCallWeather(lat, lon).enqueue(new Callback<OneCallWeather>() {
             @Override
@@ -82,25 +92,17 @@ public class MainViewModel extends BaseViewModel {
                     oneCallWeather.setValue(null);
                 }
             }
-
             @Override
             public void onFailure(Call<OneCallWeather> call, Throwable t) {
                 Log.e("hay", "onFailure: ", t.getCause());
             }
         });
     }
-
-    public void setUserWeather(String uId) {
-        getRef(uId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                HashMap<String,String> map = (HashMap<String,String>) snapshot.getValue();
-                userWeather.setValue(map);
-            }
-            @Override
-            public void onCancelled(@NonNull @NotNull DatabaseError error) {
-                Log.e(TAG, "onCancelled: " + error.getMessage());
-            }
-        });
+    //==============================================================================================
+    public void updateWeatherList(List<CurrentWeather> list){
+        weatherList.setValue(list);
     }
+
+
+
 }

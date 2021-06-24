@@ -37,8 +37,8 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         viewModel.initUser();
-
         event();
+
     }
     @Override
     protected void initObserve() {
@@ -55,17 +55,13 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
             @Override
             public void onChanged(FirebaseUser firebaseUser) {
                 if (firebaseUser != null){
-                    viewModel.setUserWeather(firebaseUser.getUid());
+                    viewModel.setUserWeather();
+                    binding.email.setText(firebaseUser.getEmail());
                 }
                 viewModel.isLogged.setValue(firebaseUser != null);
             }
         });
-        viewModel.userWeather.observe(this, new Observer<HashMap<String, String>>() {
-            @Override
-            public void onChanged(HashMap<String, String> map) {
-                binding.email.setText(map.get("email"));
-            }
-        });
+
     }
 
     private void event() {

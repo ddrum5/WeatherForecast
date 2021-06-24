@@ -7,12 +7,26 @@ import java.util.List;
 public class UserWeather {
 
 
-    @SerializedName("uId")
     private String uId;
-    @SerializedName("email")
     private String email;
-    @SerializedName("coord")
+    private Coord currentLocation;
     private List<Coord> coord;
+
+    public UserWeather() {
+    }
+    public UserWeather(Coord currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+
+    public Coord getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public void setCurrentLocation(Coord currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
 
     public String getUId() {
         return uId;
@@ -38,21 +52,19 @@ public class UserWeather {
         this.coord = coord;
     }
 
-    public static class Coord {
-        public Coord(Double lat, Double lon) {
-            this.lat = lat;
-            this.lon = lon;
-        }
 
-        @SerializedName("lat")
+
+    public static class Coord {
+
         private Double lat;
-        @SerializedName("lon")
         private Double lon;
 
         public Coord() {
-
         }
-
+        public Coord(Double lat, Double lon ) {
+            this.lat = lat;
+            this.lon = lon;
+        }
 
         public Double getLat() {
             return lat;
@@ -70,4 +82,7 @@ public class UserWeather {
             this.lon = lon;
         }
     }
+
+
+
 }

@@ -60,7 +60,11 @@ public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataB
 
     @Override
     public void onLocationChanged(Location location) {
-        viewModel.currentLocation.setValue(new UserWeather.Coord(location.getLatitude(),location.getLongitude()));
+        Double lat = location.getLatitude();
+        Double lon = location.getLongitude();
+        viewModel.currentLocation.setValue(new UserWeather.Coord(lat,lon));
+
+
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {

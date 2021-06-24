@@ -1,6 +1,8 @@
 package ddrum.weatherforecast.base;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -8,6 +10,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.models.UserWeather;
 
 public class BaseViewModel extends ViewModel {
@@ -20,8 +23,9 @@ public class BaseViewModel extends ViewModel {
 
     public void initUser() {
         auth= FirebaseAuth.getInstance();
-        user.setValue(auth.getCurrentUser());
+        updateUserState();
         isLogged.setValue(user!=null);
+
     }
     public void updateUserState(){
         user.setValue(auth.getCurrentUser());
@@ -31,9 +35,11 @@ public class BaseViewModel extends ViewModel {
         auth.signOut();
     }
 
-    public DatabaseReference getRef(String uId) {
-        return FirebaseDatabase.getInstance().getReference(uId);
+    public DatabaseReference getRef() {
+        return FirebaseDatabase.getInstance().getReference(user.getValue().getUid());
     }
+
+
 
 
 }

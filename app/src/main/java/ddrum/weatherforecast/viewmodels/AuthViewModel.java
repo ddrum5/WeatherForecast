@@ -46,7 +46,7 @@ public class AuthViewModel extends BaseViewModel {
         UserWeather u = new UserWeather();
         u.setUId(user.getValue().getUid());
         u.setEmail(user.getValue().getEmail());
-        getRef(u.getUId()).setValue(u)
+        getRef().setValue(u)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

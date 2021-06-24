@@ -1,44 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/daily_tv_day"
-        android:textSize="20sp"
-        android:text="Chủ nhật"
-        android:layout_centerVertical="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    <LinearLayout
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/daily_icon_weather"
-            android:src="@drawable/icon_sun"
-            android:layout_gravity="center"
-            android:maxWidth="50dp"
-            android:adjustViewBounds="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/daily_tv_percent_rain"
-            android:textSize="13sp"
-            android:text="50%"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="7dp"
+            android:id="@+id/daily_tv_day"
+            android:textSize="20sp"
+            android:text="Chủ nhật"
+            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/daily_tv_Temp_Min_Max"
-        android:textSize="20sp"
-        android:text="29 30"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/daily_icon_weather"
+                android:src="@drawable/icon_sun"
+                android:layout_gravity="center"
+                android:maxWidth="50dp"
+                android:adjustViewBounds="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/daily_tv_percent_rain"
+                android:textSize="13sp"
+                android:text="50%"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="7dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/daily_tv_Temp_Min_Max"
+            android:textSize="20sp"
+            android:text="29 30"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
 
-</RelativeLayout>
+    </RelativeLayout>
+</layout>
