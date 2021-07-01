@@ -1,5 +1,7 @@
 package ddrum.weatherforecast.views.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentProfileBinding;
+import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
 
 
@@ -38,7 +41,6 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         viewModel.initUser();
         event();
-
     }
     @Override
     protected void initObserve() {
@@ -55,7 +57,6 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
             @Override
             public void onChanged(FirebaseUser firebaseUser) {
                 if (firebaseUser != null){
-                    viewModel.setUserWeather();
                     binding.email.setText(firebaseUser.getEmail());
                 }
                 viewModel.isLogged.setValue(firebaseUser != null);

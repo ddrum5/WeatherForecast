@@ -1,6 +1,7 @@
 package ddrum.weatherforecast.views.adapters;
 
 import android.content.Context;
+import android.view.View;
 
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,12 @@ public class WeatherAdapter extends BaseAdapter<CurrentWeather, WeatherAdapter.H
     public WeatherAdapter(Context context) {
         super(context);
     }
+    Callback click;
+
+    public void setClick(Callback click) {
+        this.click = click;
+    }
+
 
     @Override
     protected int getLayout() {
@@ -48,6 +55,19 @@ public class WeatherAdapter extends BaseAdapter<CurrentWeather, WeatherAdapter.H
         holder.binding.time.setText(Ulti.getCurrentTime());
         Glide.with(context).load(iconUrl).into(holder.binding.currentIconWeather);
 
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                click.onClick(currentWeather.getId().toString());
+            }
+        });
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                click.onLongClick(currentWeather.getId().toString());
+                return false;
+            }
+        });
     }
 
 
@@ -55,5 +75,10 @@ public class WeatherAdapter extends BaseAdapter<CurrentWeather, WeatherAdapter.H
         public Holder(@NonNull @NotNull ItemCurrentBinding binding) {
             super(binding);
         }
+    }
+
+    public interface Callback{
+         void onClick(String cityId);
+         void onLongClick(String cityId);
     }
 }

@@ -56,7 +56,6 @@ public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBind
                     } else {
                         Toast.makeText(getActivity(), "Sai tài khoản hoặc mật khẩu!", Toast.LENGTH_SHORT).show();
                     }
-
             }
         });
     }
@@ -79,7 +78,7 @@ public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBind
     }
 
     private void loginWithEmailPassword() {
-        String user = binding.edtEmail.getText().toString().isEmpty() ? "123@gmail.com" : binding.edtEmail.getText().toString().trim();
+        String user = binding.edtEmail.getText().toString().isEmpty() ? "ddrum@gmail.com" : binding.edtEmail.getText().toString().trim();
         String pass = binding.edtPassword.getText().toString().isEmpty() ? "111111" : binding.edtPassword.getText().toString();
         viewModel.signInWithEmailAndPassword(user, pass);
 

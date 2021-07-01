@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ddrum.weatherforecast.databinding.ItemCurrentBinding;
@@ -21,7 +22,7 @@ import ddrum.weatherforecast.databinding.ItemCurrentBinding;
 
 public abstract class BaseAdapter<M, VH extends BaseViewHolder, B extends ViewDataBinding>
         extends RecyclerView.Adapter<VH> {
-    private List<M> list;
+    private List<M> list = new ArrayList<>();
     public Context context;
 
 
@@ -58,7 +59,9 @@ public abstract class BaseAdapter<M, VH extends BaseViewHolder, B extends ViewDa
     }
 
     public void updateData(List<M> list) {
-        this.list = list;
+//        this.list.clear();
+//        this.list.addAll(list);
+        this.list =list;
         notifyDataSetChanged();
     }
 

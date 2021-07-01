@@ -1,5 +1,7 @@
 package ddrum.weatherforecast.base;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,21 +10,18 @@ import android.view.ViewGroup;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.snackbar.Snackbar;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
-
-import ddrum.weatherforecast.models.UserWeather;
 
 public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataBinding> extends Fragment {
 
@@ -81,6 +80,35 @@ public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataB
 
     protected void longSnackBar(String text) {
         Snackbar.make(getView(), text, Snackbar.LENGTH_LONG).show();
+    }
+
+
+    Callback onclickDialog;
+    public void showSimpleDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setMessage(message);
+        builder.setNegativeButton("Không", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setPositiveButton("Có", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                onclickDialog.onClick();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void setOnclickDialog(Callback onclickDialog) {
+        this.onclickDialog = onclickDialog;
+    }
+
+    public interface Callback {
+        void onClick();
     }
 
 

@@ -17,7 +17,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.LocationListener;
 
-import ddrum.weatherforecast.models.UserWeather;
+import ddrum.weatherforecast.models.Coord;
+import ddrum.weatherforecast.models.User;
 
 public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataBinding> extends AppCompatActivity implements LocationListener {
 
@@ -62,7 +63,7 @@ public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataB
     public void onLocationChanged(Location location) {
         Double lat = location.getLatitude();
         Double lon = location.getLongitude();
-        viewModel.currentLocation.setValue(new UserWeather.Coord(lat,lon));
+        viewModel.currentLocation.setValue(new Coord(lat,lon));
 
 
     }

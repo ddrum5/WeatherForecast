@@ -1,23 +1,36 @@
 package ddrum.weatherforecast.viewmodels;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentId;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import ddrum.weatherforecast.base.BaseViewModel;
+import ddrum.weatherforecast.models.Constant;
+import ddrum.weatherforecast.models.Coord;
 import ddrum.weatherforecast.models.CurrentWeather;
 import ddrum.weatherforecast.models.OneCallWeather;
-import ddrum.weatherforecast.models.UserWeather;
 import ddrum.weatherforecast.network.ApiService;
 import ddrum.weatherforecast.network.RetrofitInstance;
 import retrofit2.Call;
@@ -25,18 +38,95 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
+import static android.content.Context.MODE_APPEND;
 
 public class MainViewModel extends BaseViewModel {
 
-
-    public MutableLiveData<HashMap<String, Object>> userWeather = new MutableLiveData<>();
     public MutableLiveData<CurrentWeather> defaultWeather = new MutableLiveData<>(); //vi tr hien tai
-    public MutableLiveData<List<CurrentWeather>> weatherList = new MutableLiveData<>();
-    public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();
-    ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);
+    public MutableLiveData<List<CurrentWeather>> simpleWeatherList = new MutableLiveData<>(); //list đơn giản
+    public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>(); // thời tiết chi tiết
+    public MutableLiveData<List<Coord>> fvLocationList = new MutableLiveData<>();   // list dia diem yeu thich tren fb
+    public MutableLiveData<List<String>> fvLocationListLocal = new MutableLiveData<>();   // list dia diem yeu thich tren may
+    ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class); //api
 
 
     public void init() {
+    }
+
+    public void initFvLocationLocal(Context context) {
+        fvLocationListLocal.setValue(getListFromLocal(context));
+    }
+
+    public void setFvLocationListLocal(Context context, String cityId) {
+        try {
+            FileOutputStream out = context.openFileOutput(Constant.LOCAL_LOCATIONS_FILENAME, MODE_APPEND);
+            out.write((cityId + "\n").getBytes());
+            out.close();
+        } catch (Exception e) {
+        }
+        fvLocationListLocal.setValue(getListFromLocal(context));
+    }
+
+    public void setFvLocationList() {
+        getRefLocations()
+                .whereEqualTo(Constant.USER_ID, getUserId())
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
+                        if (value != null) {
+                            List<Coord> list = value.toObjects(Coord.class);
+                            fvLocationList.setValue(list);
+                        } else {
+                            fvLocationList.setValue(null);
+                        }
+                    }
+                });
+    }
+
+    public void setSimpleWeatherList(List<Coord> coords) {
+        List<CurrentWeather> list = new ArrayList<>();
+        for (Coord c : coords) {
+            apiService.getWeatherByCityId(c.getCityId()).enqueue(new Callback<CurrentWeather>() {
+                @Override
+                public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+                    CurrentWeather currentWeather = response.body();
+                    if (currentWeather != null) {
+                        list.add(currentWeather);
+                        simpleWeatherList.setValue(list);
+                    } else {
+                        simpleWeatherList.setValue(null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CurrentWeather> call, Throwable t) {
+                    Log.e(TAG, "onFailure: ", t.getCause());
+                }
+            });
+        }
+    }
+
+    public void setSimpleWeatherListByFromLocal(List<String> cityIdList) {
+        List<CurrentWeather> list = new ArrayList<>();
+        for (String cityId : cityIdList) {
+            apiService.getWeatherByCityId(cityId).enqueue(new Callback<CurrentWeather>() {
+                @Override
+                public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+                    CurrentWeather currentWeather = response.body();
+                    if (currentWeather != null) {
+                        list.add(currentWeather);
+                        simpleWeatherList.setValue(list);
+                    } else {
+                        simpleWeatherList.setValue(null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CurrentWeather> call, Throwable t) {
+                    Log.e(TAG, "onFailure: ", t.getCause());
+                }
+            });
+        }
     }
 
     //==============================================================================================
@@ -61,69 +151,28 @@ public class MainViewModel extends BaseViewModel {
     }
 
     //==============================================================================================
-    public void setUserWeather() {
-        getRef().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
-                userWeather.setValue(map);
-//                UserWeather userWeather = snapshot.getValue(UserWeather.class);
-            }
+    public MutableLiveData<CurrentWeather> detailWeather = new MutableLiveData<>();
+    public boolean checkCity;
 
-            @Override
-            public void onCancelled(@NonNull @NotNull DatabaseError error) {
-                Log.e(TAG, "onCancelled: " + error.getMessage());
-            }
-        });
-    }
-
-    //==============================================================================================
-    public void addWeather(UserWeather.Coord coord) {
-
-    }
-
-    //==============================================================================================
-    public MutableLiveData<CurrentWeather> currentWeather = new MutableLiveData<>();
-//    public CurrentWeather getCurrentWeather(String cityName) {
-//        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
-//            @Override
-//            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-//                CurrentWeather weather = response.body();
-//                if (weather != null) {
-//                    currentWeather = weather;
-//                    return;
-//                }
-//            }
-//            @Override
-//            public void onFailure(Call<CurrentWeather> call, Throwable t) {
-//                currentWeather = null;
-//            }
-//        });
-//        return currentWeather;
-//    }
-    //==============================================================================================
-
-    public MutableLiveData<Boolean> checkCity= new MutableLiveData<>();
-    public void getCheckCityName(String cityName) {
+    public void checkCity(String cityName) {
+        checkCity = false;
         apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
             @Override
             public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
                 CurrentWeather weather = response.body();
                 if (weather != null) {
-                    checkCity.setValue(true);
-                    currentWeather.setValue(weather);
-                }else {
-                    checkCity.setValue(false);
-                    currentWeather.setValue(null);
+                    checkCity = true;
+                    detailWeather.setValue(weather);
+                } else {
+                    checkCity = false;
                 }
             }
+
             @Override
             public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                checkCity.setValue(false);
-                currentWeather.setValue(null);
+                checkCity = false;
             }
         });
-
     }
 
     //==============================================================================================
@@ -145,13 +194,23 @@ public class MainViewModel extends BaseViewModel {
             }
         });
     }
-    //==============================================================================================
 
-    //==============================================================================================
-    public void updateWeatherList(List<CurrentWeather> list) {
-        weatherList.setValue(list);
+    public void removeLocation(String cityId) {
+        getRefLocations()
+                .whereEqualTo(Constant.CITY_ID, cityId)
+                .whereEqualTo(Constant.USER_ID, getUserId())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull @NotNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                getRefLocations().document(document.getId()).delete();
+                            }
+                        }
+                    }
+                });
     }
 
-    //==============================================================================================
 
 }

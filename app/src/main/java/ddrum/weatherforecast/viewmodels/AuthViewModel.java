@@ -10,7 +10,7 @@ import com.google.firebase.auth.AuthResult;
 import org.jetbrains.annotations.NotNull;
 
 import ddrum.weatherforecast.base.BaseViewModel;
-import ddrum.weatherforecast.models.UserWeather;
+import ddrum.weatherforecast.models.User;
 
 public class AuthViewModel extends BaseViewModel {
 
@@ -43,14 +43,17 @@ public class AuthViewModel extends BaseViewModel {
     }
     private void saveToDBAndLogin() {
         initUser();
-        UserWeather u = new UserWeather();
-        u.setUId(user.getValue().getUid());
+        User u = new User();
+        u.setUserId(user.getValue().getUid());
         u.setEmail(user.getValue().getEmail());
-        getRef().setValue(u)
+        getRefUser().document(System.currentTimeMillis()+"")
+                .set(u)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        isLoginSuccessful.setValue(task.isSuccessful());
+                    public void onComplete(@NonNull @NotNull Task<Void> task) {
+                        if (task.isSuccessful()){
+                            isLoginSuccessful.setValue(task.isSuccessful());
+                        }
                     }
                 });
     }

@@ -2,9 +2,22 @@ package ddrum.weatherforecast.models;
 
 public class Constant {
 
-   public static String uId = "uId";
-   public static String email = "email";
-   public static String coord = "coord";
-   public static String lastCurrentLocation = "lastCurrentLocation";
+
+   public static String USER = "USER";
+   public static String LOCATIONS= "Locations";
+
+   public static String USER_ID = "userId";
+   public static String EMAIL = "email";
+
+   public static String CITY_ID = "cityId";
+   public static String FV_LOCATIONS = "fvLocations";
+
+
+   public static String CITY_NAME = "cityName";
+
+   public static String LOCAL_LOCATIONS_FILENAME = "listLocation.txt";
+
+   //
+
 
 }

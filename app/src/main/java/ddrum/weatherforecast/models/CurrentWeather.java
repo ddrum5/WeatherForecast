@@ -143,6 +143,9 @@ public class CurrentWeather {
         @SerializedName("lat")
         private Double lat;
 
+        public Coord(Double lat, Double lon) {
+        }
+
         public Double getLon() {
             return lon;
         }

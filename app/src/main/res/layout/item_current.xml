@@ -1,41 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="5dp"
+
+        android:layout_marginTop="5dp"
         android:background="@drawable/shadow"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
+        android:gravity="center">
 
         <LinearLayout
+            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/current_icon_Weather"
             android:orientation="vertical">
+
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="11:40"/>
-
+                android:text="11:40" />
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/current_tvCityName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hải Phòng"
-                android:maxLines="2"
-                android:maxEms="4"
-                android:autoSizeMinTextSize="20sp"
-                android:autoSizeTextType="uniform"
-                android:autoSizeStepGranularity="2sp"
-                android:textSize="25sp" />
+                android:maxLines="1"
+                android:text="Hải Phòngfdfdffdf"
+                android:textSize="23sp"
+                android:ellipsize="end" />
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/current_icon_Weather"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
             android:maxWidth="70dp"
@@ -45,29 +49,38 @@
             android:id="@+id/current_tv_Temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_toEndOf="@id/current_icon_Weather"
+            android:layout_centerInParent="true"
             android:text="32°"
-            android:textSize="40sp" />
+            android:textSize="30sp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_toEndOf="@id/current_tv_Temp"
+            android:layout_marginStart="10dp"
+            android:layout_centerInParent="true"
             android:orientation="vertical">
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/current_tv_Description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nắng nhẹ"
-                android:textSize="12sp" />
+
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/current_tv_Temp_Min_Max"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="C:45° T:25°"
                 android:textSize="13sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/current_tv_Description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nắng gắt"
+                android:maxLength="20"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="12sp" />
+
         </LinearLayout>
+    </RelativeLayout>
 
 
-    </LinearLayout>
 </layout>

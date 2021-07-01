@@ -1,7 +1,11 @@
 package ddrum.weatherforecast.views.fragments;
 
+import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
+import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,15 +18,15 @@ import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentHomeBinding;
+import ddrum.weatherforecast.models.Constant;
+import ddrum.weatherforecast.models.Coord;
 import ddrum.weatherforecast.models.CurrentWeather;
-import ddrum.weatherforecast.models.UserWeather;
+import ddrum.weatherforecast.models.User;
 import ddrum.weatherforecast.ulti.Ulti;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
 import ddrum.weatherforecast.views.adapters.WeatherAdapter;
@@ -30,8 +34,8 @@ import ddrum.weatherforecast.views.adapters.WeatherAdapter;
 public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBinding> {
 
     WeatherAdapter adapter;
-    List<UserWeather.Coord> list = new ArrayList<>();
-
+    List<String> listCityId;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected int getLayout() {
@@ -45,78 +49,83 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-        initInstance();
-        viewModel.init();
-        searchBarEvent();
+        adapter = new WeatherAdapter(getContext());
+        binding.rcv.setAdapter(adapter);
         binding();
         event();
+    }
 
+    @Override
+    protected void initObserve() {
+        viewModel.isLogged.observe(this, aBoolean -> {
+            if (aBoolean != null) {
+                if (aBoolean) {
 
+                } else {
+
+                }
+            }
+        });
+        viewModel.simpleWeatherList.observe(this, list -> {
+            if(list!=null){
+                adapter.updateData(list);
+            }
+        });
     }
 
     private void event() {
+        searchBarEvent();
         binding.swiperFresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                viewModel.currentLocation.observe(getViewLifecycleOwner(), new Observer<UserWeather.Coord>() {
+                viewModel.currentLocation.observe(getViewLifecycleOwner(), new Observer<Coord>() {
                     @Override
-                    public void onChanged(UserWeather.Coord coord) {
+                    public void onChanged(Coord coord) {
                         if (coord != null) {
                             viewModel.setDefaultWeather(coord.getLat().toString(), coord.getLon().toString());
                         }
                     }
                 });
-
                 binding.currentWeather.time.setText(getCurrentTime());
                 Snackbar.make(getView(), "Đã cập nhật lúc " + getCurrentTime(), Snackbar.LENGTH_SHORT).show();
-
                 binding.swiperFresh.setRefreshing(false);
             }
         });
-    }
+        adapter.setClick(new WeatherAdapter.Callback() {
+            @Override
+            public void onClick(String cityId) {
+                shortSnackBar(cityId);
+            }
 
+            @Override
+            public void onLongClick(String cityId) {
+                showSimpleDialog("Xoá địa điểm?");
+                setOnclickDialog(new Callback() {
+                    @Override
+                    public void onClick() {
+                        viewModel.removeLocation(cityId);
+                        shortSnackBar("Đã xoá");
+                    }
+                });
+            }
+        });
+    }
 
     private void binding() {
-        viewModel.defaultWeather.observe(this, new Observer<CurrentWeather>() {
-            @Override
-            public void onChanged(CurrentWeather currentWeather) {
-                String cityName = currentWeather.getName();
-                String description = currentWeather.getWeather().get(0).getDescription();
-                String temp = Math.round(currentWeather.getMain().getTemp()) + getString(R.string.tempUnit);
-                String tempMinMax = "t:" + Math.round(currentWeather.getMain().getTempMin())
-                        + " c:" + Math.round(currentWeather.getMain().getTempMax());
-                String iconUrl = "http://openweathermap.org/img/wn/" + currentWeather.getWeather().get(0).getIcon() + "@2x.png";
-
-                binding.currentWeather.currentTvCityName.setText(cityName);
-                binding.currentWeather.currentTvDescription.setText(description);
-                binding.currentWeather.currentTvTemp.setText(temp);
-                binding.currentWeather.currentTvTempMinMax.setText(tempMinMax);
-                binding.currentWeather.time.setText(Ulti.getCurrentTime());
-                Glide.with(getActivity()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
-            }
+        viewModel.defaultWeather.observe(this, currentWeather -> {
+            String cityName = currentWeather.getName();
+            String description = currentWeather.getWeather().get(0).getDescription();
+            String temp = Math.round(currentWeather.getMain().getTemp()) + getString(R.string.tempUnit);
+            String tempMinMax = "t:" + Math.round(currentWeather.getMain().getTempMin())
+                    + " c:" + Math.round(currentWeather.getMain().getTempMax());
+            String iconUrl = "http://openweathermap.org/img/wn/" + currentWeather.getWeather().get(0).getIcon() + "@2x.png";
+            binding.currentWeather.currentTvCityName.setText(cityName);
+            binding.currentWeather.currentTvDescription.setText(description);
+            binding.currentWeather.currentTvTemp.setText(temp);
+            binding.currentWeather.currentTvTempMinMax.setText(tempMinMax);
+            binding.currentWeather.time.setText(Ulti.getCurrentTime());
+            Glide.with(getActivity()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
         });
-
-
-        viewModel.weatherList.observe(this, list -> {
-            if (list != null) {
-                adapter.updateData(list);
-            }
-        });
-
-        viewModel.userWeather.observe(this, new Observer<HashMap<String, Object>>() {
-            @Override
-            public void onChanged(HashMap<String, Object> map) {
-
-            }
-        });
-
-
-    }
-
-
-    public void initInstance() {
-        adapter = new WeatherAdapter(getContext());
-        binding.rcv.setAdapter(adapter);
 
     }
 
@@ -128,24 +137,19 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
             @Override
             public void onSearchConfirmed(CharSequence text) {
-                viewModel.getCheckCityName(text.toString());
-                viewModel.checkCity.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
-                    @Override
-                    public void onChanged(Boolean aBoolean) {
-                        if (aBoolean != null) {
-                            if (!aBoolean){
-                                longSnackBar("Không tìm thấy thành phố");
-
-                            } else {
-                                Bundle bundle = new Bundle();
-                                bundle.putString("cityName", text.toString());
-                                navigateTo(R.id.detailsFragment2, bundle);
-                            }
-                            viewModel.checkCity.setValue(null);
-                            return;
+                viewModel.checkCity(text.toString());
+                ProgressDialog dialog = ProgressDialog.show(getContext(), "", "Đang tìm kiếm...", true);
+                dialog.show();
+                new Handler().postDelayed(new Runnable() {
+                    public void run() {
+                        if (!viewModel.checkCity) {
+                            longSnackBar("Không tìm thấy thành phố");
+                        } else {
+                            navigateTo(R.id.detailsFragment2);
                         }
+                        dialog.dismiss();
                     }
-                });
+                }, 1000);
 
             }
 
@@ -156,5 +160,6 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
         });
 
     }
-
 }
+
+
