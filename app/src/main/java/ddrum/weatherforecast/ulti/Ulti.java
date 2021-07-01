@@ -19,6 +19,10 @@ public class Ulti {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH");
         return simpleDateFormat.format(time*1000L);
     }
+    public static String getDayInWeek(Integer time) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE");
+        return simpleDateFormat.format(time*1000L);
+    }
 
 
 

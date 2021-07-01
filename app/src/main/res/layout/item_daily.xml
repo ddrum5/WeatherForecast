@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/daily_tv_percent_rain"
+                android:id="@+id/daily_tv_description"
                 android:textSize="13sp"
                 android:text="50%"
                 android:layout_marginTop="5dp"
