@@ -73,8 +73,6 @@ public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBind
                 navigateTo(R.id.action_loginFragment2_to_registerFragment2);
             }
         });
-
-
     }
 
     private void loginWithEmailPassword() {

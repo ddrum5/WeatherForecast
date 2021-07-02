@@ -65,22 +65,4 @@ public abstract class BaseAdapter<M, VH extends BaseViewHolder, B extends ViewDa
         notifyDataSetChanged();
     }
 
-    public void addItem(M item) {
-        this.list.add(item);
-        notifyItemChanged(list.size() - 1);
-    }
-
-    public void removeItem(int position) {
-        this.list.remove(position);
-        notifyItemRemoved(position);
-    }
-
-    public void removeItem(M item) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equals(item)) {
-                removeItem(i);
-                break;//ok oke
-            }
-        }
-    }
 }

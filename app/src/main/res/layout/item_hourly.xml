@@ -6,25 +6,26 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"
         android:layout_marginLeft="8dp"
+        android:paddingVertical="5dp"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/daily_tv_day"
+            android:id="@+id/daily_tv_hour"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
+            android:layout_marginBottom="4dp"
             android:layout_gravity="center_horizontal"
             android:text="20"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/daily_icon_weather"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
+            android:layout_marginBottom="4dp"
             android:layout_gravity="center"
             android:adjustViewBounds="true"
-            android:maxWidth="50dp"
+            android:maxWidth="45dp"
             android:src="@drawable/icon_sun" />
 
 
@@ -34,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="29°"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
 
     </LinearLayout>

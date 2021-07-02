@@ -19,6 +19,18 @@ public class Ulti {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH");
         return simpleDateFormat.format(time*1000L);
     }
+    public static String getCurrentHour() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH");
+        return simpleDateFormat.format(System.currentTimeMillis());
+    }
+    public static String getDayInWeek(Integer time) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE");
+        return simpleDateFormat.format(time*1000L);
+    }
+    public static String upperCaseFirstLetter(String myString){
+        return  (myString.substring(0, 1).toUpperCase() + myString.substring(1).toLowerCase());
+
+    }
 
 
 

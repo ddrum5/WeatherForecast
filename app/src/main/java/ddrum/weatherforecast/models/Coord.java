@@ -12,10 +12,8 @@ public class Coord {
         this.lon = lon;
     }
 
-    public Coord(String userId, String cityId, Double lat, Double lon) {
+    public Coord(String userId, String cityId) {
         this.cityId = cityId;
-        this.lat = lat;
-        this.lon = lon;
         this.userId = userId;
     }
 
@@ -23,35 +21,20 @@ public class Coord {
     public Coord() {
     }
 
-    public String getUserId() {
-        return userId;
-    }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public Double getLat() {
         return lat;
     }
 
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
 
     public Double getLon() {
         return lon;
     }
 
-    public void setLon(Double lon) {
-        this.lon = lon;
-    }
 
     public String getCityId() {
         return cityId;
     }
 
-    public void setCityId(String cityId) {
-        this.cityId = cityId;
-    }
 }

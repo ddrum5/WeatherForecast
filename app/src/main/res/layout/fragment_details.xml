@@ -11,13 +11,12 @@
 
 
         <LinearLayout
+            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
             android:orientation="vertical">
-
-
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/current_tvCityName"
                 android:layout_width="wrap_content"
@@ -25,28 +24,23 @@
                 android:layout_marginEnd="5dp"
                 android:text="Hải Phòng"
                 android:textSize="25sp" />
-
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
                 android:orientation="horizontal">
-
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/current_tv_Description"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nắng nhẹ"
+                    android:text="nắng nhẹ"
                     android:textSize="15sp" />
-
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/current_icon_Weather"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
-                    android:maxWidth="20dp"
+                    android:maxWidth="30dp"
                     android:src="@drawable/icon_sun" />
-
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -61,7 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cảm giác như 48°"
-                android:textSize="20sp" />
+                android:textSize="17sp" />
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_add_to_list"
                 android:text="Thêm vào danh sách"
