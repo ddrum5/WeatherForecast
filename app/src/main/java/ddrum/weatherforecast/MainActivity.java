@@ -55,8 +55,8 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                     viewModel.setFvLocationList();
                     viewModel.fvLocationListLocal.setValue(null);
                 } else {
-                    viewModel.fvLocationList.setValue(null);
                     viewModel.initFvLocationLocal(MainActivity.this);
+                    viewModel.fvLocationList.setValue(null);
                 }
             }
         });
@@ -80,6 +80,7 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                 }
             }
         });
+
     }
 
 

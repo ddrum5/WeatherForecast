@@ -1,46 +1,52 @@
 package ddrum.weatherforecast.views.adapters;
 
 import android.content.Context;
-import android.view.View;
-
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ddrum.weatherforecast.R;
-import ddrum.weatherforecast.base.BaseAdapter;
-import ddrum.weatherforecast.base.BaseViewHolder;
 import ddrum.weatherforecast.databinding.ItemCurrentBinding;
 import ddrum.weatherforecast.models.CurrentWeather;
 import ddrum.weatherforecast.ulti.Ulti;
 
-public class SimpleWeatherAdapter extends BaseAdapter<CurrentWeather, SimpleWeatherAdapter.Holder,ItemCurrentBinding> {
+public class SimpleWeatherAdapter extends RecyclerView.Adapter<SimpleWeatherAdapter.ViewHolder>{
 
-    public SimpleWeatherAdapter(Context context) {
-        super(context);
-    }
-    Callback click;
 
-    public void setClick(Callback click) {
-        this.click = click;
+
+    public void setData(List<CurrentWeather> list) {
+        this.list = list;
+        notifyDataSetChanged();
     }
 
+    Context context;
+    List<CurrentWeather> list;
+    public SimpleWeatherAdapter(Context context ){
+        list= new ArrayList<>();
+        this.context = context;
+    }
+
+    @NonNull
+    @NotNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+        ItemCurrentBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),R.layout.item_current,parent,false);
+        return new ViewHolder(binding);
+    }
 
     @Override
-    protected int getLayout() {
-        return R.layout.item_current;
-    }
-
-    @Override
-    protected Holder getViewHolder(ItemCurrentBinding binding) {
-        return new Holder(binding);
-    }
-
-    @Override
-    protected void bindView(CurrentWeather currentWeather, Holder holder, int position) {
+    public void onBindViewHolder(@NonNull @NotNull SimpleWeatherAdapter.ViewHolder holder, int position) {
+        CurrentWeather currentWeather = list.get(position);
         String cityName = currentWeather.getName();
         String description = currentWeather.getWeather().get(0).getDescription();
         String temp = Math.round(currentWeather.getMain().getTemp()) + context.getString(R.string.tempUnit);
@@ -54,31 +60,22 @@ public class SimpleWeatherAdapter extends BaseAdapter<CurrentWeather, SimpleWeat
         holder.binding.currentTvTempMinMax.setText(tempMinMax);
         holder.binding.time.setText(Ulti.getCurrentTime());
         Glide.with(context).load(iconUrl).into(holder.binding.currentIconWeather);
-
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                click.onClick(currentWeather.getId().toString());
-            }
-        });
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                click.onLongClick(currentWeather.getId().toString());
-                return false;
-            }
-        });
     }
 
 
-    public static class Holder extends BaseViewHolder<ItemCurrentBinding> {
-        public Holder(@NonNull @NotNull ItemCurrentBinding binding) {
-            super(binding);
+    @Override
+    public int getItemCount() {
+        if (list != null) {
+            return list.size();
         }
+        return 0;
     }
 
-    public interface Callback{
-         void onClick(String cityId);
-         void onLongClick(String cityId);
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ItemCurrentBinding binding;
+        public ViewHolder(@NonNull @NotNull ItemCurrentBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
     }
 }

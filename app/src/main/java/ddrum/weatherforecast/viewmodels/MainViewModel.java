@@ -42,13 +42,12 @@ import static android.content.Context.MODE_APPEND;
 
 public class MainViewModel extends BaseViewModel {
 
-    public MutableLiveData<CurrentWeather> defaultWeather = new MutableLiveData<>();        //vi tr hien tai
-    public MutableLiveData<CurrentWeather> simpleWeather = new MutableLiveData<>();            //Thời tiết đơn giản
+    public MutableLiveData<CurrentWeather> defaultWeather = new MutableLiveData<>(); //vi tr hien tai
     public MutableLiveData<List<CurrentWeather>> simpleWeatherList = new MutableLiveData<>(); //list đơn giản
-    public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();        // thời tiết chi tiết
-    public MutableLiveData<List<Coord>> fvLocationList = new MutableLiveData<>();          // list dia diem yeu thich tren fb
+    public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>(); // thời tiết chi tiết
+    public MutableLiveData<List<Coord>> fvLocationList = new MutableLiveData<>();   // list dia diem yeu thich tren fb
     public MutableLiveData<List<String>> fvLocationListLocal = new MutableLiveData<>();   // list dia diem yeu thich tren may
-    ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);      //api
+    ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class); //api
 
 
     public void init() {
@@ -130,6 +129,7 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
+    //==============================================================================================
     public void setDefaultWeather(String lat, String lon) {
         apiService.getWeatherByCoord(lat, lon).enqueue(new Callback<CurrentWeather>() {
             @Override
@@ -150,6 +150,32 @@ public class MainViewModel extends BaseViewModel {
         });
     }
 
+    //==============================================================================================
+    public MutableLiveData<CurrentWeather> detailWeather = new MutableLiveData<>();
+    public boolean checkCity;
+
+    public void checkCity(String cityName) {
+        checkCity = false;
+        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
+            @Override
+            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+                CurrentWeather weather = response.body();
+                if (weather != null) {
+                    checkCity = true;
+                    detailWeather.setValue(weather);
+                } else {
+                    checkCity = false;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CurrentWeather> call, Throwable t) {
+                checkCity = false;
+            }
+        });
+    }
+
+    //==============================================================================================
     public void setOneCallWeather(String lat, String lon) {
         apiService.getOneCallWeather(lat, lon).enqueue(new Callback<OneCallWeather>() {
             @Override
@@ -165,43 +191,6 @@ public class MainViewModel extends BaseViewModel {
             @Override
             public void onFailure(Call<OneCallWeather> call, Throwable t) {
                 Log.e("hay", "onFailure: ", t.getCause());
-            }
-        });
-    }
-
-    public void setSimpleWeather(String cityId) {
-        apiService.getWeatherByCityId(cityId).enqueue(new Callback<CurrentWeather>() {
-            @Override
-            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-               CurrentWeather weather = response.body();
-                if (weather != null) {
-                    simpleWeather.setValue(weather);
-                }
-            }
-            @Override
-            public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                simpleWeather.setValue(null);
-            }
-        });
-
-
-    }
-
-    public boolean checkCity;
-    public void checkCity(String cityName) {
-        checkCity = false;
-        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
-            @Override
-            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-                CurrentWeather weather = response.body();
-                if (weather != null) {
-                    checkCity = true;
-                    simpleWeather.setValue(weather);
-                } else checkCity = false;
-            }
-            @Override
-            public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                checkCity = false;
             }
         });
     }

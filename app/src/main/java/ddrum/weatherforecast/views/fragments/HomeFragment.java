@@ -1,9 +1,11 @@
 package ddrum.weatherforecast.views.fragments;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,17 +18,24 @@ import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentHomeBinding;
+import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.models.Coord;
+import ddrum.weatherforecast.models.CurrentWeather;
+import ddrum.weatherforecast.models.User;
 import ddrum.weatherforecast.ulti.Ulti;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
-import ddrum.weatherforecast.views.adapters.SimpleWeatherAdapter;
+import ddrum.weatherforecast.views.adapters.WeatherAdapter;
 
 public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBinding> {
 
-    SimpleWeatherAdapter adapter;
+    WeatherAdapter adapter;
+    List<String> listCityId;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected int getLayout() {
@@ -40,7 +49,7 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-        adapter = new SimpleWeatherAdapter(getContext());
+        adapter = new WeatherAdapter(getContext());
         binding.rcv.setAdapter(adapter);
         binding();
         event();
@@ -82,11 +91,10 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
                 binding.swiperFresh.setRefreshing(false);
             }
         });
-        adapter.setClick(new SimpleWeatherAdapter.Callback() {
+        adapter.setClick(new WeatherAdapter.Callback() {
             @Override
             public void onClick(String cityId) {
-                viewModel.setSimpleWeather(cityId);
-                navigateTo(R.id.detailsFragment2);
+                shortSnackBar(cityId);
             }
 
             @Override
