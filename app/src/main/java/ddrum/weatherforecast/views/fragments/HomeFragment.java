@@ -19,9 +19,6 @@ import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentHomeBinding;
@@ -104,22 +101,23 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
                 bundle.putString("cityId", cityId);
                 navigateTo(R.id.action_homeFragment2_to_detailsFragment2, bundle);
             }
-
             @Override
             public void onLongClick(String cityId) {
                 showSimpleDialog("Xoá địa điểm?");
                 setOnclickDialog(new Callback() {
                     @Override
                     public void onClick() {
-                        viewModel.removeLocation(cityId);
+                        if (viewModel.isLogged.getValue()){
+                            viewModel.removeLocation(cityId);
+                        } else {
+                            viewModel.removeFvLocationLocal(cityId);
+                        }
                         shortSnackBar("Đã xoá");
                     }
                 });
             }
         });
     }
-
-
 
 
 
@@ -139,7 +137,7 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            arrayAdapter.getFilter().filter(s);
+//            arrayAdapter.getFilter().filter(s);
         }
 
         @Override

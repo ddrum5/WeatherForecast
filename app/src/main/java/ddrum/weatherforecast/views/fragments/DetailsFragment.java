@@ -96,7 +96,6 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
             }
         });
 
-
         viewModel.fvLocationList.observe(getViewLifecycleOwner(), list -> {
             if (list != null) {
                 if (containsCityId(list, cityId)) {
@@ -116,7 +115,6 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
                 }
             }
         });
-
     }
 
     private void addLocationToFB() {
@@ -125,7 +123,6 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         } else {
             shortSnackBar("Có lỗi");
         }
-
     }
 
     private void addLocationToLocal() {
@@ -135,10 +132,6 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
 
     public boolean containsCityId(final List<FvLocation> list, final String cityId) {
         return list.stream().anyMatch(o -> o.getCityId().equals(cityId));
-    }
-
-    public boolean containsCityIdString(final List<String> list, final String cityId) {
-        return list.stream().anyMatch(o -> o.equals(cityId));
     }
 
     @Override

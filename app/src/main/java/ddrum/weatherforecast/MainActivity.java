@@ -54,6 +54,7 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                     viewModel.fvLocationListLocal.setValue(null);
                 } else {
                     viewModel.fvLocationList.setValue(null);
+                    viewModel.updateLocationListLocal();
                 }
             }
         });
@@ -62,19 +63,21 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
             @Override
             public void onChanged(List<FvLocation> fvLocations) {
                 if (fvLocations != null) {
-                    viewModel.setSimpleWeatherList(fvLocations);
-                } else {
-                    viewModel.simpleWeatherList.setValue(null);
+                    if (fvLocations.size() > 0)
+                        viewModel.setSimpleWeatherList(fvLocations);
+                    else
+                        viewModel.simpleWeatherList.setValue(null);
                 }
             }
         });
         viewModel.fvLocationListLocal.observe(this, new Observer<List<FvLocation>>() {
             @Override
-            public void onChanged(List<FvLocation> list) {
-                if (list != null) {
-                    viewModel.setSimpleWeatherList(list);
-                } else {
-                    viewModel.simpleWeatherList.setValue(null);
+            public void onChanged(List<FvLocation> fvLocations) {
+                if (fvLocations != null) {
+                    if (fvLocations.size() > 0)
+                        viewModel.setSimpleWeatherList(fvLocations);
+                    else
+                        viewModel.simpleWeatherList.setValue(null);
                 }
             }
         });

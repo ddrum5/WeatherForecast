@@ -60,10 +60,17 @@ public class MainViewModel extends BaseViewModel {
         updateLocationListLocal();
     }
 
-    public void addFvLocationToLocal(FvLocation fvLocation) {
-        fvLocationsDAO.insert(fvLocation);
+    public boolean addFvLocationToLocal(FvLocation fvLocation) {
+        if(fvLocationsDAO.insert(fvLocation)>0){
+            updateLocationListLocal();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public void removeFvLocationLocal(String cityId) {
+        fvLocationsDAO.removeFvLocationById(cityId);
         updateLocationListLocal();
-
     }
 
     public void updateLocationListLocal() {
@@ -71,7 +78,6 @@ public class MainViewModel extends BaseViewModel {
     }
 
     private boolean checkAddLocation;
-
     public boolean addFvLocationToFB(FvLocation fvLocation) {
         getRefLocations()
                 .document(System.currentTimeMillis() + "")

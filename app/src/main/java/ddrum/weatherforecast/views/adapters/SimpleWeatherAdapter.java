@@ -65,7 +65,7 @@ public class SimpleWeatherAdapter extends BaseAdapter<CurrentWeather, SimpleWeat
             @Override
             public boolean onLongClick(View v) {
                 click.onLongClick(currentWeather.getId().toString());
-                return false;
+                return true;
             }
         });
     }
