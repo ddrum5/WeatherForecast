@@ -1,29 +1,19 @@
 package ddrum.weatherforecast.views.adapters;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseAdapter;
 import ddrum.weatherforecast.base.BaseViewHolder;
-import ddrum.weatherforecast.databinding.ItemCurrentBinding;
 import ddrum.weatherforecast.databinding.ItemHourlyBinding;
-import ddrum.weatherforecast.models.CurrentWeather;
 import ddrum.weatherforecast.models.OneCallWeather;
-import ddrum.weatherforecast.ulti.Ulti;
+import ddrum.weatherforecast.ulti.Util;
 
 public class HourlyWeatherAdapter extends BaseAdapter<OneCallWeather.Hourly, HourlyWeatherAdapter.Holder, ItemHourlyBinding> {
 
@@ -47,7 +37,7 @@ public class HourlyWeatherAdapter extends BaseAdapter<OneCallWeather.Hourly, Hou
 
         String temp = Math.round(item.getTemp()) + "°";
         String iconUrl = "http://openweathermap.org/img/wn/" + item.getWeather().get(0).getIcon() + "@2x.png";
-        String hour = Ulti.getHour(item.getDt());
+        String hour = Util.getHour(item.getDt());
 
       if(position==0){
           hour ="Bây giờ";

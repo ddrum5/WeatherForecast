@@ -15,7 +15,7 @@ import ddrum.weatherforecast.base.BaseAdapter;
 import ddrum.weatherforecast.base.BaseViewHolder;
 import ddrum.weatherforecast.databinding.ItemCurrentBinding;
 import ddrum.weatherforecast.models.CurrentWeather;
-import ddrum.weatherforecast.ulti.Ulti;
+import ddrum.weatherforecast.ulti.Util;
 
 public class SimpleWeatherAdapter extends BaseAdapter<CurrentWeather, SimpleWeatherAdapter.Holder,ItemCurrentBinding> {
 
@@ -52,7 +52,7 @@ public class SimpleWeatherAdapter extends BaseAdapter<CurrentWeather, SimpleWeat
         holder.binding.currentTvDescription.setText(description);
         holder.binding.currentTvTemp.setText(temp);
         holder.binding.currentTvTempMinMax.setText(tempMinMax);
-        holder.binding.time.setText(Ulti.getCurrentTime());
+        holder.binding.time.setText(Util.getCurrentTime());
         Glide.with(context).load(iconUrl).into(holder.binding.currentIconWeather);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {

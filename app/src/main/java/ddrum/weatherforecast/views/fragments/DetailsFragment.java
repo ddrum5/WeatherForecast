@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 
-import android.os.Handler;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
@@ -21,8 +20,9 @@ import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentDetailsBinding;
 import ddrum.weatherforecast.models.Coord;
+import ddrum.weatherforecast.models.FvLocation;
 import ddrum.weatherforecast.models.OneCallWeather;
-import ddrum.weatherforecast.ulti.Ulti;
+import ddrum.weatherforecast.ulti.Util;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
 import ddrum.weatherforecast.views.adapters.DailyWeatherAdapter;
 import ddrum.weatherforecast.views.adapters.HourlyWeatherAdapter;
@@ -32,7 +32,7 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
 
 
     String cityId;
-    Coord coord;
+    FvLocation fvLocation;
     HourlyWeatherAdapter hourlyWeatherAdapter;
     DailyWeatherAdapter dailyWeatherAdapter;
 
@@ -50,9 +50,8 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
 
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        onClickListener(binding.btnAddToList);
         init();
-        binding();
-        event();
     }
     private void init() {
         hourlyWeatherAdapter = new HourlyWeatherAdapter(getContext());
@@ -64,7 +63,8 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         }
     }
 
-    private void binding() {
+    @Override
+    protected void initObserve() {
         viewModel.oneCallWeather.observe(this, oneCallWeather -> {
             if (oneCallWeather != null) {
                 List<OneCallWeather.Hourly> hourlyList = oneCallWeather.getHourly();
@@ -77,7 +77,7 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         viewModel.simpleWeather.observe(getViewLifecycleOwner(), currentWeather -> {
             if (currentWeather != null) {
                 cityId = currentWeather.getId().toString();
-                coord = new Coord(viewModel.getUserId(), cityId);
+                fvLocation = new FvLocation(viewModel.getUserId(), cityId);
                 String cityName = currentWeather.getName() + ", " + currentWeather.getSys().getCountry();
                 binding.currentTvCityName.setText(cityName);
             }
@@ -87,7 +87,7 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
             public void onChanged(OneCallWeather oneCallWeather) {
                 String description = oneCallWeather.getCurrent().getWeather().get(0).getDescription();
                 String temp = Math.round(oneCallWeather.getCurrent().getTemp()) + getString(R.string.tempUnit) + "C";
-                String feelsLike = Ulti.upperCaseFirstLetter("cảm giác như " + Math.round(oneCallWeather.getCurrent().getFeelsLike()) + "°") ;
+                String feelsLike = Util.upperCaseFirstLetter("cảm giác như " + Math.round(oneCallWeather.getCurrent().getFeelsLike()) + "°") ;
                 String iconUrl = "http://openweathermap.org/img/wn/" + oneCallWeather.getCurrent().getWeather().get(0).getIcon() + "@2x.png";
                 binding.currentTvDescription.setText(description);
                 binding.currentTvTemp.setText(temp);
@@ -97,9 +97,9 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         });
 
 
-        viewModel.fvLocationList.observe(getViewLifecycleOwner(), coords -> {
-            if (coords != null) {
-                if (containsCityId(coords, cityId)) {
+        viewModel.fvLocationList.observe(getViewLifecycleOwner(), list -> {
+            if (list != null) {
+                if (containsCityId(list, cityId)) {
                     binding.btnAddToList.setVisibility(View.GONE);
                 } else {
                     binding.btnAddToList.setVisibility(View.VISIBLE);
@@ -109,7 +109,7 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
 
         viewModel.fvLocationListLocal.observe(getViewLifecycleOwner(), list -> {
             if (list != null) {
-                if (containsCityIdString(list, cityId)) {
+                if (containsCityId(list, cityId)) {
                     binding.btnAddToList.setVisibility(View.GONE);
                 } else {
                     binding.btnAddToList.setVisibility(View.VISIBLE);
@@ -119,39 +119,21 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
 
     }
 
-    private void event() {
-        binding.btnAddToList.setOnClickListener(v -> {
-            if (viewModel.isLogged.getValue()) {
-                addLocationToFB();
-            } else {
-                addLocationToLocal();
-            }
-        });
-    }
-
     private void addLocationToFB() {
-        viewModel.getRefLocations()
-                .document(System.currentTimeMillis() + "")
-                .set(coord)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull @NotNull Task<Void> task) {
-                        if (task.isComplete()) {
-                            shortSnackBar("Thêm địa điểm thành công");
-                        } else {
-                            shortSnackBar("Có lỗi" + task.getException());
-                        }
-                    }
-                });
+        if (viewModel.addFvLocationToFB(fvLocation)) {
+            shortSnackBar("Thêm địa điểm thành công");
+        } else {
+            shortSnackBar("Có lỗi");
+        }
 
     }
 
     private void addLocationToLocal() {
-        viewModel.setFvLocationListLocal(getContext(), cityId);
+       viewModel.addFvLocationToLocal(fvLocation);
         shortSnackBar("Thêm địa điểm thành công");
     }
 
-    public boolean containsCityId(final List<Coord> list, final String cityId) {
+    public boolean containsCityId(final List<FvLocation> list, final String cityId) {
         return list.stream().anyMatch(o -> o.getCityId().equals(cityId));
     }
 
@@ -159,7 +141,14 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         return list.stream().anyMatch(o -> o.equals(cityId));
     }
 
-
+    @Override
+    public void onClick(View v) {
+        if (viewModel.isLogged.getValue()) {
+            addLocationToFB();
+        } else {
+            addLocationToLocal();
+        }
+    }
 }
 
 

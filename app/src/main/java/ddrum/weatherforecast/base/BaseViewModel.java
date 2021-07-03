@@ -54,25 +54,6 @@ public class BaseViewModel extends ViewModel {
         return FirebaseFirestore.getInstance().collection(Constant.LOCATIONS);
     }
 
-    protected List<String> getListFromLocal(Context context){
-        List<String> list = new ArrayList<>();
-        try {
-            // Open stream to read file.
-            FileInputStream in = context.openFileInput(Constant.LOCAL_LOCATIONS_FILENAME);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String s = null;
-            while ((s = br.readLine()) != null) {
-                list.add(s);
-            }
-        } catch (Exception e) {
-
-        } finally {
-            return list;
-        }
-    }
-
-
-
 
 
 

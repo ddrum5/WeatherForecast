@@ -57,6 +57,9 @@ public class AuthViewModel extends BaseViewModel {
                     }
                 });
     }
+
+
+
     public void signInWithEmailAndPassword(String email, String pass){
         auth.signInWithEmailAndPassword(email,pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override

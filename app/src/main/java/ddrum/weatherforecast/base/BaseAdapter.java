@@ -20,7 +20,7 @@ import java.util.List;
 import ddrum.weatherforecast.databinding.ItemCurrentBinding;
 
 
-public abstract class BaseAdapter<M, VH extends BaseViewHolder, B extends ViewDataBinding>
+public abstract class BaseAdapter<M, VH extends BaseViewHolder<B>, B extends ViewDataBinding>
         extends RecyclerView.Adapter<VH> {
     private List<M> list = new ArrayList<>();
     public Context context;
@@ -52,7 +52,7 @@ public abstract class BaseAdapter<M, VH extends BaseViewHolder, B extends ViewDa
 
     @Override
     public int getItemCount() {
-        if (list !=null){
+        if (list != null) {
             return list.size();
         }
         return 0;
@@ -61,7 +61,7 @@ public abstract class BaseAdapter<M, VH extends BaseViewHolder, B extends ViewDa
     public void updateData(List<M> list) {
 //        this.list.clear();
 //        this.list.addAll(list);
-        this.list =list;
+        this.list = list;
         notifyDataSetChanged();
     }
 

@@ -1,6 +1,5 @@
 package ddrum.weatherforecast.views.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -8,14 +7,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +14,6 @@ import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentLoginBinding;
 import ddrum.weatherforecast.viewmodels.AuthViewModel;
-import ddrum.weatherforecast.viewmodels.MainViewModel;
 
 public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBinding> {
 
@@ -40,7 +30,7 @@ public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBind
 
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-        event();
+        onClickListener(binding.btnLogin, binding.btnRegister);
     }
 
     @Override
@@ -60,19 +50,16 @@ public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBind
         });
     }
 
-    private void event() {
-        binding.btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_login:
                 loginWithEmailPassword();
-            }
-        });
-        binding.btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                break;
+            case R.id.btn_register:
                 navigateTo(R.id.action_loginFragment2_to_registerFragment2);
-            }
-        });
+                break;
+        }
     }
 
     private void loginWithEmailPassword() {
@@ -82,6 +69,4 @@ public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBind
 
 
     }
-
-
 }

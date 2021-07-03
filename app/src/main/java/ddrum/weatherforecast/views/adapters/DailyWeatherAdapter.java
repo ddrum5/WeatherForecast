@@ -12,9 +12,8 @@ import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseAdapter;
 import ddrum.weatherforecast.base.BaseViewHolder;
 import ddrum.weatherforecast.databinding.ItemDailyBinding;
-import ddrum.weatherforecast.databinding.ItemHourlyBinding;
 import ddrum.weatherforecast.models.OneCallWeather;
-import ddrum.weatherforecast.ulti.Ulti;
+import ddrum.weatherforecast.ulti.Util;
 
 public class DailyWeatherAdapter extends BaseAdapter<OneCallWeather.Daily, DailyWeatherAdapter.Holder, ItemDailyBinding> {
 
@@ -34,7 +33,7 @@ public class DailyWeatherAdapter extends BaseAdapter<OneCallWeather.Daily, Daily
 
     @Override
     protected void bindView(OneCallWeather.Daily item, Holder holder, int position) {
-        String time = Ulti.getDayInWeek(item.getDt());
+        String time = Util.getDayInWeek(item.getDt());
         String tempMinMax =Math.round(item.getTemp().getMin())
                 + "  " + Math.round(item.getTemp().getMax());
         String iconUrl = "http://openweathermap.org/img/wn/" + item.getWeather().get(0).getIcon() + "@2x.png";

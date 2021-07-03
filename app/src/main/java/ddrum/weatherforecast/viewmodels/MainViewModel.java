@@ -30,9 +30,12 @@ import ddrum.weatherforecast.base.BaseViewModel;
 import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.models.Coord;
 import ddrum.weatherforecast.models.CurrentWeather;
+import ddrum.weatherforecast.models.FvLocation;
 import ddrum.weatherforecast.models.OneCallWeather;
 import ddrum.weatherforecast.network.ApiService;
 import ddrum.weatherforecast.network.RetrofitInstance;
+import ddrum.weatherforecast.roomdatabases.DatabaseInstance;
+import ddrum.weatherforecast.roomdatabases.FvLocationsDAO;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -46,27 +49,46 @@ public class MainViewModel extends BaseViewModel {
     public MutableLiveData<CurrentWeather> simpleWeather = new MutableLiveData<>();            //Thời tiết đơn giản
     public MutableLiveData<List<CurrentWeather>> simpleWeatherList = new MutableLiveData<>(); //list đơn giản
     public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();        // thời tiết chi tiết
-    public MutableLiveData<List<Coord>> fvLocationList = new MutableLiveData<>();          // list dia diem yeu thich tren fb
-    public MutableLiveData<List<String>> fvLocationListLocal = new MutableLiveData<>();   // list dia diem yeu thich tren may
+    public MutableLiveData<List<FvLocation>> fvLocationList = new MutableLiveData<>();          // list dia diem yeu thich tren fb
+    public MutableLiveData<List<FvLocation>> fvLocationListLocal = new MutableLiveData<>();   // list dia diem yeu thich tren may
     ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);      //api
+    FvLocationsDAO fvLocationsDAO;
 
 
-    public void init() {
+    public void initFvLocationsDAO(Context context) {
+        fvLocationsDAO = DatabaseInstance.getInstance(context).fvLocationsDAO();
+        updateLocationListLocal();
     }
 
-    public void initFvLocationLocal(Context context) {
-        fvLocationListLocal.setValue(getListFromLocal(context));
+    public void addFvLocationToLocal(FvLocation fvLocation) {
+        fvLocationsDAO.insert(fvLocation);
+        updateLocationListLocal();
+
     }
 
-    public void setFvLocationListLocal(Context context, String cityId) {
-        try {
-            FileOutputStream out = context.openFileOutput(Constant.LOCAL_LOCATIONS_FILENAME, MODE_APPEND);
-            out.write((cityId + "\n").getBytes());
-            out.close();
-        } catch (Exception e) {
-        }
-        fvLocationListLocal.setValue(getListFromLocal(context));
+    public void updateLocationListLocal() {
+        fvLocationListLocal.setValue(fvLocationsDAO.getFvLocations());
     }
+
+    private boolean checkAddLocation;
+
+    public boolean addFvLocationToFB(FvLocation fvLocation) {
+        getRefLocations()
+                .document(System.currentTimeMillis() + "")
+                .set(fvLocation)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull @NotNull Task<Void> task) {
+                        if (task.isComplete()) {
+                            checkAddLocation = true;
+                        } else {
+                            checkAddLocation = false;
+                        }
+                    }
+                });
+        return checkAddLocation;
+    }
+
 
     public void setFvLocationList() {
         getRefLocations()
@@ -75,7 +97,7 @@ public class MainViewModel extends BaseViewModel {
                     @Override
                     public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
                         if (value != null) {
-                            List<Coord> list = value.toObjects(Coord.class);
+                            List<FvLocation> list = value.toObjects(FvLocation.class);
                             fvLocationList.setValue(list);
                         } else {
                             fvLocationList.setValue(null);
@@ -84,18 +106,16 @@ public class MainViewModel extends BaseViewModel {
                 });
     }
 
-    public void setSimpleWeatherList(List<Coord> coords) {
+    public void setSimpleWeatherList(List<FvLocation> fvLocations) {
         List<CurrentWeather> list = new ArrayList<>();
-        for (Coord c : coords) {
-            apiService.getWeatherByCityId(c.getCityId()).enqueue(new Callback<CurrentWeather>() {
+        for (FvLocation fv : fvLocations) {
+            apiService.getWeatherByCityId(fv.getCityId()).enqueue(new Callback<CurrentWeather>() {
                 @Override
                 public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
                     CurrentWeather currentWeather = response.body();
                     if (currentWeather != null) {
                         list.add(currentWeather);
                         simpleWeatherList.setValue(list);
-                    } else {
-                        simpleWeatherList.setValue(null);
                     }
                 }
 
@@ -107,39 +127,13 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
-    public void setSimpleWeatherListByFromLocal(List<String> cityIdList) {
-        List<CurrentWeather> list = new ArrayList<>();
-        for (String cityId : cityIdList) {
-            apiService.getWeatherByCityId(cityId).enqueue(new Callback<CurrentWeather>() {
-                @Override
-                public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-                    CurrentWeather currentWeather = response.body();
-                    if (currentWeather != null) {
-                        list.add(currentWeather);
-                        simpleWeatherList.setValue(list);
-                    } else {
-                        simpleWeatherList.setValue(null);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                    Log.e(TAG, "onFailure: ", t.getCause());
-                }
-            });
-        }
-    }
 
     public void setDefaultWeather(String lat, String lon) {
         apiService.getWeatherByCoord(lat, lon).enqueue(new Callback<CurrentWeather>() {
             @Override
             public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
                 CurrentWeather currentWeather = response.body();
-                if (currentWeather != null) {
-                    defaultWeather.setValue(currentWeather);
-                } else {
-                    defaultWeather.setValue(null);
-                }
+                defaultWeather.setValue(currentWeather);
             }
 
             @Override
@@ -155,12 +149,9 @@ public class MainViewModel extends BaseViewModel {
             @Override
             public void onResponse(Call<OneCallWeather> call, Response<OneCallWeather> response) {
                 OneCallWeather weather = response.body();
-                if (weather != null) {
-                    oneCallWeather.setValue(weather);
-                } else {
-                    oneCallWeather.setValue(null);
-                }
+                oneCallWeather.setValue(weather);
             }
+
             @Override
             public void onFailure(Call<OneCallWeather> call, Throwable t) {
                 Log.e("hay", "onFailure: ", t.getCause());
@@ -172,12 +163,13 @@ public class MainViewModel extends BaseViewModel {
         apiService.getWeatherByCityId(cityId).enqueue(new Callback<CurrentWeather>() {
             @Override
             public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-               CurrentWeather weather = response.body();
+                CurrentWeather weather = response.body();
                 if (weather != null) {
                     simpleWeather.setValue(weather);
-                    setOneCallWeather(weather.getCoord().getLat().toString(),weather.getCoord().getLon().toString());
+                    setOneCallWeather(weather.getCoord().getLat().toString(), weather.getCoord().getLon().toString());
                 }
             }
+
             @Override
             public void onFailure(Call<CurrentWeather> call, Throwable t) {
                 simpleWeather.setValue(null);
@@ -187,6 +179,7 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public boolean checkCity;
+
     public void checkCity(String cityName) {
         checkCity = false;
         apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
@@ -196,9 +189,10 @@ public class MainViewModel extends BaseViewModel {
                 if (weather != null) {
                     checkCity = true;
                     simpleWeather.setValue(weather);
-                    setOneCallWeather(weather.getCoord().getLat().toString(),weather.getCoord().getLon().toString());
+                    setOneCallWeather(weather.getCoord().getLat().toString(), weather.getCoord().getLon().toString());
                 } else checkCity = false;
             }
+
             @Override
             public void onFailure(Call<CurrentWeather> call, Throwable t) {
                 checkCity = false;

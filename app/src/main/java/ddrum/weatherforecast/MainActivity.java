@@ -9,18 +9,15 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ddrum.weatherforecast.base.BaseActivity;
 import ddrum.weatherforecast.databinding.ActivityMainBinding;
 import ddrum.weatherforecast.models.Coord;
-import ddrum.weatherforecast.models.User;
+import ddrum.weatherforecast.models.FvLocation;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
 
 public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBinding> {
-    List<User> userList = new ArrayList<>();
-
 
     @Override
     protected int getLayout() {
@@ -34,14 +31,15 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
 
     @Override
     protected void initView(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-
         viewModel.initUser();
         NavController navController = Navigation.findNavController(this, R.id.nav_host);
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-        event();
+        viewModel.initFvLocationsDAO(MainActivity.this);
+
     }
 
-    private void event() {
+    @Override
+    protected void initObserve() {
         viewModel.currentLocation.observe(this, new Observer<Coord>() {
             @Override
             public void onChanged(Coord coord) {
@@ -56,25 +54,25 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                     viewModel.fvLocationListLocal.setValue(null);
                 } else {
                     viewModel.fvLocationList.setValue(null);
-                    viewModel.initFvLocationLocal(MainActivity.this);
                 }
             }
         });
-        viewModel.fvLocationList.observe(this, new Observer<List<Coord>>() {
+
+        viewModel.fvLocationList.observe(this, new Observer<List<FvLocation>>() {
             @Override
-            public void onChanged(List<Coord> coords) {
-                if (coords != null) {
-                    viewModel.setSimpleWeatherList(coords);
+            public void onChanged(List<FvLocation> fvLocations) {
+                if (fvLocations != null) {
+                    viewModel.setSimpleWeatherList(fvLocations);
                 } else {
                     viewModel.simpleWeatherList.setValue(null);
                 }
             }
         });
-        viewModel.fvLocationListLocal.observe(this, new Observer<List<String>>() {
+        viewModel.fvLocationListLocal.observe(this, new Observer<List<FvLocation>>() {
             @Override
-            public void onChanged(List<String> list) {
+            public void onChanged(List<FvLocation> list) {
                 if (list != null) {
-                    viewModel.setSimpleWeatherListByFromLocal(list);
+                    viewModel.setSimpleWeatherList(list);
                 } else {
                     viewModel.simpleWeatherList.setValue(null);
                 }

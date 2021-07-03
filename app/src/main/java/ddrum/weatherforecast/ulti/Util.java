@@ -1,15 +1,9 @@
 package ddrum.weatherforecast.ulti;
 
 
-import android.content.Context;
-import android.content.DialogInterface;
-
-import androidx.appcompat.app.AlertDialog;
-
 import java.text.SimpleDateFormat;
 
-public class Ulti {
-
+public class Util {
 
     public static String getCurrentTime() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
@@ -19,10 +13,7 @@ public class Ulti {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH");
         return simpleDateFormat.format(time*1000L);
     }
-    public static String getCurrentHour() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH");
-        return simpleDateFormat.format(System.currentTimeMillis());
-    }
+
     public static String getDayInWeek(Integer time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE");
         return simpleDateFormat.format(time*1000L);
@@ -31,9 +22,6 @@ public class Ulti {
         return  (myString.substring(0, 1).toUpperCase() + myString.substring(1).toLowerCase());
 
     }
-
-
-
 
 
 }

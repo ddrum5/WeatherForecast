@@ -1,7 +1,5 @@
 package ddrum.weatherforecast.views.fragments;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,12 +12,9 @@ import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentProfileBinding;
-import ddrum.weatherforecast.models.Constant;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
 
 
@@ -39,8 +34,8 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
 
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        onClickListener(binding.btnSignIn, binding.btnSignOut);
         viewModel.initUser();
-        event();
     }
     @Override
     protected void initObserve() {
@@ -53,6 +48,7 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
                 binding.Logged.setVisibility(View.GONE);
             }
         });
+
         viewModel.user.observe(this, new Observer<FirebaseUser>() {
             @Override
             public void onChanged(FirebaseUser firebaseUser) {
@@ -62,24 +58,19 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
                 viewModel.isLogged.setValue(firebaseUser != null);
             }
         });
-
     }
 
-    private void event() {
-        binding.btnSignOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btnSignIn:
+                navigateTo(R.id.action_profileFragment2_to_loginFragment2);
+                break;
+            case R.id.btnSignOut:
                 viewModel.logout();
                 viewModel.updateUserState();
                 shortSnackBar("Đã đăng xuất");
-            }
-        });
-        binding.btnSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navigateTo(R.id.action_profileFragment2_to_loginFragment2);
-            }
-        });
+                break;
+        }
     }
-
 }

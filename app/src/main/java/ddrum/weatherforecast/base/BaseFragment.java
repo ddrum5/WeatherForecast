@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 
-public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataBinding> extends Fragment {
+public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataBinding> extends Fragment implements View.OnClickListener {
 
     protected abstract int getLayout();
 
@@ -53,21 +53,23 @@ public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataB
         initObserve();
     }
 
+    protected void onClickListener(View... views) {
+        for (View view : views) {
+            view.setOnClickListener(this);
+        }
+    }
     protected void navigateTo(@IdRes int actionId) {
         NavHostFragment.findNavController(this).navigate(actionId);
     }
+
     protected void navigateTo(@IdRes int actionId, Bundle bundle) {
-        NavHostFragment.findNavController(this).navigate(actionId,bundle);
+        NavHostFragment.findNavController(this).navigate(actionId, bundle);
     }
 
     protected void popBackStack() {
         NavHostFragment.findNavController(this).popBackStack();
     }
 
-    protected String convertTimestamp(int timestamp) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-        return simpleDateFormat.format( timestamp * 1000L);
-    }
 
     protected String getCurrentTime() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
@@ -84,6 +86,7 @@ public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataB
 
 
     Callback onclickDialog;
+
     public void showSimpleDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setMessage(message);
@@ -103,6 +106,8 @@ public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataB
         dialog.show();
     }
 
+
+
     public void setOnclickDialog(Callback onclickDialog) {
         this.onclickDialog = onclickDialog;
     }
@@ -111,7 +116,7 @@ public abstract class BaseFragment<VM extends BaseViewModel, B extends ViewDataB
         void onClick();
     }
 
-
-
-
+    @Override
+    public void onClick(View v) {
+    }
 }

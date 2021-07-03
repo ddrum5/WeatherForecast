@@ -9,10 +9,12 @@
         android:layout_height="match_parent"
         tools:context=".views.fragments.HomeFragment">
 
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
 
             <com.mancj.materialsearchbar.MaterialSearchBar
                 android:id="@+id/searchBar"
@@ -23,45 +25,58 @@
                 app:mt_maxSuggestionsCount="5"
                 app:mt_placeholder="Tìm kiếm" />
 
+
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <LinearLayout
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content">
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:text="  Vị trí hiện tại "
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <include
-                        android:id="@+id/currentWeather"
-                        layout="@layout/item_current"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/tv_fvLocation"
-                        android:text="  Địa điểm yêu thích "
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rcv"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="  Vị trí hiện tại " />
+
+                        <include
+                            android:id="@+id/currentWeather"
+                            layout="@layout/item_current"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tv_fvLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="  Địa điểm yêu thích " />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rcv"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:clipToPadding="false"
+                            android:nestedScrollingEnabled="false"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            tools:listitem="@layout/item_current" />
+                    </LinearLayout>
+
+                    <ListView
+                        android:id="@+id/lv_Suggestion"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:clipToPadding="false"
-                        android:nestedScrollingEnabled="false"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        tools:listitem="@layout/item_current" />
-                </LinearLayout>
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/shadow_extra"
+                        android:visibility="gone"/>
+                </FrameLayout>
 
             </androidx.core.widget.NestedScrollView>
 
-
         </LinearLayout>
-
-
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </layout>

@@ -1,23 +1,9 @@
 package ddrum.weatherforecast.models;
 
-import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
-
 public class User {
-    
-    private String userId;
-    private String email;
-    private List<Coord> fvLocations;
-    
-    public User(String userId, String email, List<Coord> fvLocations) {
+    public User(String userId, String email) {
         this.userId = userId;
         this.email = email;
-        this.fvLocations = fvLocations;
-    }
-
-    public User() {
-
     }
 
     public String getUserId() {
@@ -36,12 +22,9 @@ public class User {
         this.email = email;
     }
 
-    public List<Coord> getFvLocations() {
-        return fvLocations;
+    public User() {
     }
 
-    public void setFvLocations(List<Coord> fvLocations) {
-        this.fvLocations = fvLocations;
-    }
-
+    private String userId;
+    private String email;
 }
