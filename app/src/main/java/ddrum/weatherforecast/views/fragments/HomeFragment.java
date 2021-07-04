@@ -64,7 +64,6 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
                 adapter.clearData();
             }
         });
-
         viewModel.defaultWeather.observe(getViewLifecycleOwner(), currentWeather -> {
             String cityName = currentWeather.getName();
             String description = currentWeather.getWeather().get(0).getDescription();
@@ -81,7 +80,7 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
             Glide.with(requireContext()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
         });
         viewModel.searchHistoryList.observe(getViewLifecycleOwner(), searchHistories -> {
-            if(searchHistories !=null) {
+            if (searchHistories != null) {
                 suggestionAdapter.clear();
                 suggestionAdapter.addAll(Util.getTextList(searchHistories));
             }
@@ -120,11 +119,11 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
                 });
             }
         });
-        binding.lvSuggestion.setOnItemClickListener((parent, view, position, id) -> {
-            searchCity(suggestionAdapter.getItem(position));
-        });
+
         binding.currentWeather.defaultWeather.setOnClickListener(v -> {
-            goToDetail(viewModel.defaultWeather.getValue().getId().toString());
+            if (viewModel.defaultWeather.getValue() != null) {
+                goToDetail(viewModel.defaultWeather.getValue().getId().toString());
+            }
         });
 
     }
@@ -139,8 +138,10 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
     private void searchBarEvent() {
         binding.searchBar.addTextChangeListener(searchWatcher);
         binding.searchBar.setOnSearchActionListener(searchActionListener);
+        binding.lvSuggestion.setOnItemClickListener((parent, view, position, id) -> {
+            searchCity(suggestionAdapter.getItem(position));
+        });
     }
-
 
     private final TextWatcher searchWatcher = new TextWatcher() {
         @Override
@@ -157,16 +158,17 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
         }
     };
 
-
     private final MaterialSearchBar.OnSearchActionListener searchActionListener = new MaterialSearchBar.OnSearchActionListener() {
         @Override
         public void onSearchStateChanged(boolean enabled) {
             binding.lvSuggestion.setVisibility(enabled ? View.VISIBLE : View.GONE);
         }
+
         @Override
         public void onSearchConfirmed(CharSequence text) {
             searchCity(text.toString());
         }
+
         @Override
         public void onButtonClicked(int buttonCode) {
         }
