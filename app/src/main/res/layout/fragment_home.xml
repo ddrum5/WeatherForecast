@@ -25,14 +25,14 @@
                 app:mt_maxSuggestionsCount="5"
                 app:mt_placeholder="Tìm kiếm" />
 
-
-            <androidx.core.widget.NestedScrollView
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <FrameLayout
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -64,18 +64,17 @@
                             android:nestedScrollingEnabled="false"
                             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                             tools:listitem="@layout/item_current" />
+
                     </LinearLayout>
 
-                    <ListView
-                        android:id="@+id/lv_Suggestion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/shadow_extra"
-                        android:visibility="gone"/>
-                </FrameLayout>
-
-            </androidx.core.widget.NestedScrollView>
-
+                </androidx.core.widget.NestedScrollView>
+                <ListView
+                    android:id="@+id/lv_Suggestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/shadow"
+                    android:visibility="gone" />
+            </FrameLayout>
         </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

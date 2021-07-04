@@ -22,7 +22,8 @@ import ddrum.weatherforecast.databinding.ItemCurrentBinding;
 
 public abstract class BaseAdapter<M, VH extends BaseViewHolder<B>, B extends ViewDataBinding>
         extends RecyclerView.Adapter<VH> {
-    private List<M> list = new ArrayList<>();
+
+    protected List<M> list = new ArrayList<>();
     public Context context;
 
 

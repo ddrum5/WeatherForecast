@@ -34,7 +34,7 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
         viewModel.initUser();
         NavController navController = Navigation.findNavController(this, R.id.nav_host);
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-        viewModel.initFvLocationsDAO(MainActivity.this);
+        viewModel.initDAO(MainActivity.this);
 
     }
 
@@ -51,10 +51,12 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
             public void onChanged(Boolean aBoolean) {
                 if (aBoolean) {
                     viewModel.setFvLocationList();
+                    viewModel.setSearchHistoryList();
                     viewModel.fvLocationListLocal.setValue(null);
                 } else {
-                    viewModel.fvLocationList.setValue(null);
                     viewModel.updateLocationListLocal();
+                    viewModel.updateSearchHistoryListFromLocal();
+                    viewModel.fvLocationList.setValue(null);
                 }
             }
         });
@@ -63,24 +65,25 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
             @Override
             public void onChanged(List<FvLocation> fvLocations) {
                 if (fvLocations != null) {
-                    if (fvLocations.size() > 0)
-                        viewModel.setSimpleWeatherList(fvLocations);
-                    else
-                        viewModel.simpleWeatherList.setValue(null);
+                    viewModel.setSimpleWeatherList(fvLocations);
+                } else {
+                    viewModel.simpleWeatherList.setValue(null);
                 }
             }
         });
+
         viewModel.fvLocationListLocal.observe(this, new Observer<List<FvLocation>>() {
             @Override
             public void onChanged(List<FvLocation> fvLocations) {
                 if (fvLocations != null) {
-                    if (fvLocations.size() > 0)
-                        viewModel.setSimpleWeatherList(fvLocations);
-                    else
-                        viewModel.simpleWeatherList.setValue(null);
+                    viewModel.setSimpleWeatherListLocal(fvLocations);
+                } else {
+                    viewModel.simpleWeatherListLocal.setValue(null);
                 }
             }
         });
+
+
     }
 
 

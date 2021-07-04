@@ -117,30 +117,13 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         });
     }
 
-    private void addLocationToFB() {
-        if (viewModel.addFvLocationToFB(fvLocation)) {
-            shortSnackBar("Thêm địa điểm thành công");
-        } else {
-            shortSnackBar("Có lỗi");
-        }
-    }
-
-    private void addLocationToLocal() {
-       viewModel.addFvLocationToLocal(fvLocation);
-        shortSnackBar("Thêm địa điểm thành công");
-    }
-
     public boolean containsCityId(final List<FvLocation> list, final String cityId) {
         return list.stream().anyMatch(o -> o.getCityId().equals(cityId));
     }
 
     @Override
     public void onClick(View v) {
-        if (viewModel.isLogged.getValue()) {
-            addLocationToFB();
-        } else {
-            addLocationToLocal();
-        }
+        viewModel.addLocation(fvLocation);
     }
 }
 

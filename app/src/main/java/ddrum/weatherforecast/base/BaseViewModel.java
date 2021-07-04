@@ -53,6 +53,9 @@ public class BaseViewModel extends ViewModel {
     public CollectionReference getRefLocations(){
         return FirebaseFirestore.getInstance().collection(Constant.LOCATIONS);
     }
+    public CollectionReference getRefSearch(){
+        return FirebaseFirestore.getInstance().collection(Constant.SEARCH);
+    }
 
 
 

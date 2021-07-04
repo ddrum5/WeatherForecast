@@ -68,7 +68,6 @@ public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataB
         Double lon = location.getLongitude();
         viewModel.currentLocation.setValue(new Coord(lat,lon));
 
-
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {

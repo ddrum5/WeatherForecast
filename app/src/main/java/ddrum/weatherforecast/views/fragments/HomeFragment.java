@@ -6,11 +6,11 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.Observer;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
@@ -19,10 +19,14 @@ import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ddrum.weatherforecast.R;
 import ddrum.weatherforecast.base.BaseFragment;
 import ddrum.weatherforecast.databinding.FragmentHomeBinding;
 import ddrum.weatherforecast.models.Coord;
+import ddrum.weatherforecast.models.SearchHistory;
 import ddrum.weatherforecast.ulti.Util;
 import ddrum.weatherforecast.viewmodels.MainViewModel;
 import ddrum.weatherforecast.views.adapters.SimpleWeatherAdapter;
@@ -30,8 +34,7 @@ import ddrum.weatherforecast.views.adapters.SimpleWeatherAdapter;
 public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBinding> {
 
     private SimpleWeatherAdapter adapter;
-
-    private ArrayAdapter<String> arrayAdapter;
+    private ArrayAdapter<String> suggestionAdapter;
 
     @Override
     protected int getLayout() {
@@ -46,19 +49,27 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         adapter = new SimpleWeatherAdapter(requireContext());
+        suggestionAdapter = new ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line);
         binding.rcv.setAdapter(adapter);
+        binding.lvSuggestion.setAdapter(suggestionAdapter);
         event();
     }
 
     @Override
     protected void initObserve() {
-        viewModel.simpleWeatherList.observe(this, list -> {
+
+        viewModel.simpleWeatherList.observe(getViewLifecycleOwner(), list -> {
+            if (list != null) {
+                adapter.updateData(list);
+            }
+        });
+        viewModel.simpleWeatherListLocal.observe(getViewLifecycleOwner(), list -> {
             if (list != null) {
                 adapter.updateData(list);
             }
         });
 
-        viewModel.defaultWeather.observe(this, currentWeather -> {
+        viewModel.defaultWeather.observe(getViewLifecycleOwner(), currentWeather -> {
             String cityName = currentWeather.getName();
             String description = currentWeather.getWeather().get(0).getDescription();
             String temp = Math.round(currentWeather.getMain().getTemp()) + getString(R.string.tempUnit);
@@ -73,6 +84,14 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
             binding.currentWeather.time.setText(Util.getCurrentTime());
             Glide.with(requireContext()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
         });
+        viewModel.searchHistoryList.observe(getViewLifecycleOwner(), searchHistories -> {
+            suggestionAdapter.clear();
+            List<String> list = new ArrayList<>();
+            for (SearchHistory sh : searchHistories) {
+                list.add(sh.getText());
+            }
+            suggestionAdapter.addAll(list);
+        });
     }
 
     private void event() {
@@ -80,14 +99,10 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
         binding.swiperFresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                viewModel.currentLocation.observe(getViewLifecycleOwner(), new Observer<Coord>() {
-                    @Override
-                    public void onChanged(Coord coord) {
-                        if (coord != null) {
-                            viewModel.setDefaultWeather(coord.getLat().toString(), coord.getLon().toString());
-                        }
-                    }
-                });
+                Coord coord = viewModel.currentLocation.getValue();
+                if (coord != null)
+                    viewModel.setDefaultWeather(coord.getLat().toString(), coord.getLon().toString());
+
                 binding.currentWeather.time.setText(getCurrentTime());
                 Snackbar.make(getView(), "Đã cập nhật lúc " + getCurrentTime(), Snackbar.LENGTH_SHORT).show();
                 binding.swiperFresh.setRefreshing(false);
@@ -96,37 +111,40 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
         adapter.setClick(new SimpleWeatherAdapter.Callback() {
             @Override
             public void onClick(String cityId) {
-                viewModel.setWeatherDetail(cityId);
-                Bundle bundle = new Bundle();
-                bundle.putString("cityId", cityId);
-                navigateTo(R.id.action_homeFragment2_to_detailsFragment2, bundle);
+                goToDetail(cityId);
             }
+
             @Override
             public void onLongClick(String cityId) {
                 showSimpleDialog("Xoá địa điểm?");
                 setOnclickDialog(new Callback() {
                     @Override
                     public void onClick() {
-                        if (viewModel.isLogged.getValue()){
-                            viewModel.removeLocation(cityId);
-                        } else {
-                            viewModel.removeFvLocationLocal(cityId);
-                        }
+                        viewModel.removeLocation(cityId);
                         shortSnackBar("Đã xoá");
                     }
                 });
             }
         });
+        binding.lvSuggestion.setOnItemClickListener((parent, view, position, id) -> {
+            searchCity(suggestionAdapter.getItem(position));
+        });
+        binding.currentWeather.defaultWeather.setOnClickListener(v -> {
+            goToDetail(viewModel.defaultWeather.getValue().getId().toString());
+        });
+
     }
 
-
+    private void goToDetail(String cityId) {
+        viewModel.setWeatherDetail(cityId);
+        Bundle bundle = new Bundle();
+        bundle.putString("cityId", cityId);
+        navigateTo(R.id.action_homeFragment2_to_detailsFragment2, bundle);
+    }
 
     private void searchBarEvent() {
-//        arrayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, list);
-        binding.lvSuggestion.setAdapter(arrayAdapter);
         binding.searchBar.addTextChangeListener(searchWatcher);
         binding.searchBar.setOnSearchActionListener(searchActionListener);
-
     }
 
 
@@ -137,7 +155,7 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-//            arrayAdapter.getFilter().filter(s);
+            suggestionAdapter.getFilter().filter(s);
         }
 
         @Override
@@ -146,35 +164,37 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
     };
 
 
-
     private final MaterialSearchBar.OnSearchActionListener searchActionListener = new MaterialSearchBar.OnSearchActionListener() {
         @Override
         public void onSearchStateChanged(boolean enabled) {
             binding.lvSuggestion.setVisibility(enabled ? View.VISIBLE : View.GONE);
         }
-
         @Override
         public void onSearchConfirmed(CharSequence text) {
-            viewModel.checkCity(text.toString());
-            ProgressDialog dialog = ProgressDialog.show(getContext(), "", "Đang tìm kiếm...", true);
-            dialog.show();
-            new Handler().postDelayed(new Runnable() {
-                public void run() {
-                    if (!viewModel.checkCity) {
-                        longSnackBar("Không tìm thấy thành phố");
-                    } else {
-                        navigateTo(R.id.detailsFragment2);
-                    }
-                    dialog.dismiss();
-                }
-            }, 1000);
-
+            searchCity(text.toString());
         }
-
         @Override
         public void onButtonClicked(int buttonCode) {
         }
     };
+
+    private void searchCity(String text) {
+        viewModel.checkCity(text.toString());
+        ProgressDialog dialog = ProgressDialog.show(getContext(), "", "Đang tìm kiếm...", true);
+        dialog.show();
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                if (!viewModel.checkCity) {
+                    longSnackBar("Không tìm thấy thành phố");
+                } else {
+                    navigateTo(R.id.detailsFragment2);
+                }
+                dialog.dismiss();
+            }
+        }, 1000);
+    }
+
+
 }
 
 

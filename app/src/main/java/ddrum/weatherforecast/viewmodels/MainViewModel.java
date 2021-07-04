@@ -32,10 +32,12 @@ import ddrum.weatherforecast.models.Coord;
 import ddrum.weatherforecast.models.CurrentWeather;
 import ddrum.weatherforecast.models.FvLocation;
 import ddrum.weatherforecast.models.OneCallWeather;
+import ddrum.weatherforecast.models.SearchHistory;
 import ddrum.weatherforecast.network.ApiService;
 import ddrum.weatherforecast.network.RetrofitInstance;
 import ddrum.weatherforecast.roomdatabases.DatabaseInstance;
 import ddrum.weatherforecast.roomdatabases.FvLocationsDAO;
+import ddrum.weatherforecast.roomdatabases.SearchHistoryDAO;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,56 +47,94 @@ import static android.content.Context.MODE_APPEND;
 
 public class MainViewModel extends BaseViewModel {
 
-    public MutableLiveData<CurrentWeather> defaultWeather = new MutableLiveData<>();        //vi tr hien tai
-    public MutableLiveData<CurrentWeather> simpleWeather = new MutableLiveData<>();            //Thời tiết đơn giản
-    public MutableLiveData<List<CurrentWeather>> simpleWeatherList = new MutableLiveData<>(); //list đơn giản
-    public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();        // thời tiết chi tiết
-    public MutableLiveData<List<FvLocation>> fvLocationList = new MutableLiveData<>();          // list dia diem yeu thich tren fb
-    public MutableLiveData<List<FvLocation>> fvLocationListLocal = new MutableLiveData<>();   // list dia diem yeu thich tren may
-    ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);      //api
-    FvLocationsDAO fvLocationsDAO;
+    public MutableLiveData<CurrentWeather> defaultWeather = new MutableLiveData<>();
+    public MutableLiveData<CurrentWeather> simpleWeather = new MutableLiveData<>();
+    public MutableLiveData<List<CurrentWeather>> simpleWeatherList = new MutableLiveData<>();
+    public MutableLiveData<List<CurrentWeather>> simpleWeatherListLocal = new MutableLiveData<>();
+    public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();
+    public MutableLiveData<List<FvLocation>> fvLocationList = new MutableLiveData<>();
+    public MutableLiveData<List<FvLocation>> fvLocationListLocal = new MutableLiveData<>();
+    public MutableLiveData<List<SearchHistory>> searchHistoryList = new MutableLiveData<>();
+    private ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);
+    private FvLocationsDAO fvLocationsDAO;
+    private SearchHistoryDAO searchHistoryDAO;
 
 
-    public void initFvLocationsDAO(Context context) {
+    public void initDAO(Context context) {
         fvLocationsDAO = DatabaseInstance.getInstance(context).fvLocationsDAO();
+        searchHistoryDAO = DatabaseInstance.getInstance(context).searchHistoryDAO();
         updateLocationListLocal();
-    }
-
-    public boolean addFvLocationToLocal(FvLocation fvLocation) {
-        if(fvLocationsDAO.insert(fvLocation)>0){
-            updateLocationListLocal();
-            return true;
-        } else {
-            return false;
-        }
-    }
-    public void removeFvLocationLocal(String cityId) {
-        fvLocationsDAO.removeFvLocationById(cityId);
-        updateLocationListLocal();
+        updateSearchHistoryListFromLocal();
     }
 
     public void updateLocationListLocal() {
         fvLocationListLocal.setValue(fvLocationsDAO.getFvLocations());
     }
 
-    private boolean checkAddLocation;
-    public boolean addFvLocationToFB(FvLocation fvLocation) {
-        getRefLocations()
-                .document(System.currentTimeMillis() + "")
-                .set(fvLocation)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
+    public void updateSearchHistoryListFromLocal() {
+        searchHistoryList.setValue(searchHistoryDAO.getSearchHistoryList());
+    }
+
+    private void addSearchHistory(String text) {
+        SearchHistory history = new SearchHistory(getUserId(), text);
+        if (isLogged.getValue()) {
+            getRefSearch().document(text)
+                    .set(history);
+        } else {
+            searchHistoryDAO.insert(history);
+            updateSearchHistoryListFromLocal();
+        }
+    }
+
+    public void addLocation(FvLocation fvLocation) {
+        if (isLogged.getValue()) {
+            getRefLocations()
+                    .document(System.currentTimeMillis() + "")
+                    .set(fvLocation);
+
+        } else {
+            fvLocationsDAO.insert(fvLocation);
+            updateLocationListLocal();
+        }
+    }
+
+    public void removeLocation(String cityId) {
+        if (isLogged.getValue()) {
+            getRefLocations()
+                    .whereEqualTo(Constant.CITY_ID, cityId)
+                    .whereEqualTo(Constant.USER_ID, getUserId())
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull @NotNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (DocumentSnapshot document : task.getResult()) {
+                                    getRefLocations().document(document.getId()).delete();
+                                }
+                            }
+                        }
+                    });
+        } else {
+            fvLocationsDAO.removeFvLocationById(cityId);
+            updateLocationListLocal();
+        }
+    }
+
+    public void setSearchHistoryList() {
+        getRefSearch().whereEqualTo(Constant.USER_ID, getUserId())
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onComplete(@NonNull @NotNull Task<Void> task) {
-                        if (task.isComplete()) {
-                            checkAddLocation = true;
+                    public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
+                        if (value != null) {
+                            List<SearchHistory> list = value.toObjects(SearchHistory.class);
+                            searchHistoryList.setValue(list);
                         } else {
-                            checkAddLocation = false;
+                            searchHistoryList.setValue(null);
                         }
                     }
                 });
-        return checkAddLocation;
-    }
 
+    }
 
     public void setFvLocationList() {
         getRefLocations()
@@ -133,6 +173,26 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
+    public void setSimpleWeatherListLocal(List<FvLocation> fvLocations) {
+        List<CurrentWeather> list = new ArrayList<>();
+        for (FvLocation fv : fvLocations) {
+            apiService.getWeatherByCityId(fv.getCityId()).enqueue(new Callback<CurrentWeather>() {
+                @Override
+                public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+                    CurrentWeather currentWeather = response.body();
+                    if (currentWeather != null) {
+                        list.add(currentWeather);
+                        simpleWeatherListLocal.setValue(list);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CurrentWeather> call, Throwable t) {
+                    Log.e(TAG, "onFailure: ", t.getCause());
+                }
+            });
+        }
+    }
 
     public void setDefaultWeather(String lat, String lon) {
         apiService.getWeatherByCoord(lat, lon).enqueue(new Callback<CurrentWeather>() {
@@ -187,6 +247,7 @@ public class MainViewModel extends BaseViewModel {
     public boolean checkCity;
 
     public void checkCity(String cityName) {
+        addSearchHistory(cityName);
         checkCity = false;
         apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
             @Override
@@ -204,23 +265,6 @@ public class MainViewModel extends BaseViewModel {
                 checkCity = false;
             }
         });
-    }
-
-    public void removeLocation(String cityId) {
-        getRefLocations()
-                .whereEqualTo(Constant.CITY_ID, cityId)
-                .whereEqualTo(Constant.USER_ID, getUserId())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull @NotNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                getRefLocations().document(document.getId()).delete();
-                            }
-                        }
-                    }
-                });
     }
 
 

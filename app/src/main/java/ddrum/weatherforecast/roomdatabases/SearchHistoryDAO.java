@@ -12,22 +12,20 @@ import androidx.room.Query;
 import java.util.List;
 
 import ddrum.weatherforecast.models.FvLocation;
+import ddrum.weatherforecast.models.SearchHistory;
 
 @Dao
-public interface FvLocationsDAO {
+public interface SearchHistoryDAO {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void insert(FvLocation fvLocations);
+    public void insert(SearchHistory searchHistory);
 
-    @Delete
-    public void delete(FvLocation fvLocation);
 
-    @Query("SELECT * FROM fvLocations")
-    public List<FvLocation> getFvLocations();
+    @Query("SELECT * FROM searchHistory")
+    public List<SearchHistory> getSearchHistoryList();
 
-    @Query("DELETE FROM fvLocations WHERE  cityId=:cityId ")
-    public void removeFvLocationById(String cityId);
+
 
 
 }

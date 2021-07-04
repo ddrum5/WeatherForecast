@@ -48,6 +48,14 @@ public class HourlyWeatherAdapter extends BaseAdapter<OneCallWeather.Hourly, Hou
         Glide.with(context).load(iconUrl).into(holder.binding.dailyIconWeather);
     }
 
+    @Override
+    public int getItemCount() {
+        if (list.size() > 0){
+            return 24;
+        } else {
+            return 0;
+        }
+    }
 
     public static class Holder extends BaseViewHolder<ItemHourlyBinding> {
         public Holder(@NonNull @NotNull ItemHourlyBinding binding) {

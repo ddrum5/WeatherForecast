@@ -9,9 +9,10 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import ddrum.weatherforecast.models.FvLocation;
+import ddrum.weatherforecast.models.SearchHistory;
 
 
-@Database(entities = {FvLocation.class}, version = 1,exportSchema = false)
+@Database(entities = {FvLocation.class, SearchHistory.class}, version = 1,exportSchema = false)
 public abstract class DatabaseInstance extends RoomDatabase {
 
     public static final String DATABASE_NAME = "WeatherDB";
@@ -19,6 +20,7 @@ public abstract class DatabaseInstance extends RoomDatabase {
     private static DatabaseInstance databaseInstance;
 
     public abstract FvLocationsDAO fvLocationsDAO();
+    public abstract SearchHistoryDAO searchHistoryDAO();
 
 
     public static DatabaseInstance getInstance(Context context) {
