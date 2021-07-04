@@ -35,19 +35,7 @@ public class RegisterFragment extends BaseFragment<AuthViewModel, FragmentRegist
     }
     @Override
     protected void initObserve() {
-        viewModel.existedEmail.observe(this, new Observer<Boolean>() {
-                    @Override
-                    public void onChanged(Boolean aBoolean) {
-                        if (aBoolean !=null) {
-                            if (aBoolean){
-                                Toast.makeText(getContext(), "Email đã tồn tại", Toast.LENGTH_LONG).show();
-                            } else {
-                                viewModel.existedEmail.setValue(null);
-                            }
-                        }
-                    }
-                }
-        );
+
         viewModel.isLoginSuccessful.observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean isLoginSuccessful) {
@@ -60,8 +48,17 @@ public class RegisterFragment extends BaseFragment<AuthViewModel, FragmentRegist
                     }
             }
         });
-    }
 
+        viewModel.message.observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if(s!=null){
+                    shortSnackBar(s);
+                    viewModel.message.setValue(null);
+                }
+            }
+        });
+    }
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -73,23 +70,12 @@ public class RegisterFragment extends BaseFragment<AuthViewModel, FragmentRegist
                 break;
         }
     }
-
     private void register() {
         String email = binding.edtEmail.getText().toString().trim();
         String pass = binding.edtPassword.getText().toString();
         String passConfirm = binding.edtPasswordConfirm.getText().toString();
+        viewModel.registerClick(email, pass, passConfirm);
 
-        if (!pass.equals(passConfirm)) {
-            Toast.makeText(getContext(), "Xác nhận mật khẩu không đúng", Toast.LENGTH_SHORT).show();
-            return;
-        } else {
-            if (pass.length() < 6) {
-                Toast.makeText(getContext(), "Mật khẩu phải có 6 kí tự trở lên", Toast.LENGTH_SHORT).show();
-                binding.edtPassword.requestFocus();
-                return;
-            }
-        }
-        viewModel.registerClick(email, pass);
     }
 
 

@@ -11,24 +11,45 @@ import org.jetbrains.annotations.NotNull;
 
 import ddrum.weatherforecast.base.BaseViewModel;
 import ddrum.weatherforecast.models.User;
+import ddrum.weatherforecast.ulti.Util;
 
 public class AuthViewModel extends BaseViewModel {
 
-    public MutableLiveData<Boolean> existedEmail = new MutableLiveData<>();
     public MutableLiveData<Boolean> isLoginSuccessful = new MutableLiveData<>();
+    public MutableLiveData<String> message = new MutableLiveData<>(null);
 
-    public void registerClick(String email, String pass) {
+
+    public void registerClick(String email, String pass, String passConfirm) {
+        if (!Util.isValidEmail(email)) {
+            message.setValue("Email không đúng định dạng");
+            return;
+        } else {
+            if (!pass.equals(passConfirm)) {
+                message.setValue("Xác nhận mật khẩu không đúng");
+                return;
+            } else {
+                if (pass.length() < 6) {
+                    message.setValue("Mật khẩu phải có 6 kí tự trở lên");
+                    return;
+                } else {
+                    checkEmailExited(email,pass);
+                }
+            }
+        }
+    }
+
+    public void checkEmailExited(String email, String pass) {
         auth.fetchSignInMethodsForEmail(email)
                 .addOnCompleteListener(task -> {
                     boolean check = task.getResult().getSignInMethods().isEmpty();
                     if (!check) {
-                        existedEmail.setValue(true);
+                        message.setValue("Email đã tồn tại");
+                        return;
                     } else {
                         createWithEmailPass(email, pass);
                     }
                 });
     }
-
     public void createWithEmailPass(String email, String pass) {
         auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
@@ -41,27 +62,24 @@ public class AuthViewModel extends BaseViewModel {
             }
         });
     }
+
     private void saveToDBAndLogin() {
         initUser();
         User u = new User();
         u.setUserId(user.getValue().getUid());
         u.setEmail(user.getValue().getEmail());
-        getRefUser().document(System.currentTimeMillis()+"")
+        getRefUser().document(System.currentTimeMillis() + "")
                 .set(u)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull @NotNull Task<Void> task) {
-                        if (task.isSuccessful()){
                             isLoginSuccessful.setValue(task.isSuccessful());
-                        }
                     }
                 });
     }
 
-
-
-    public void signInWithEmailAndPassword(String email, String pass){
-        auth.signInWithEmailAndPassword(email,pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+    public void signInWithEmailAndPassword(String email, String pass) {
+        auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull @NotNull Task<AuthResult> task) {
                 initUser();
@@ -69,7 +87,6 @@ public class AuthViewModel extends BaseViewModel {
             }
         });
     }
-
 
 
 }

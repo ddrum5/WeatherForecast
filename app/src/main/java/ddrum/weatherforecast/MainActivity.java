@@ -11,6 +11,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ddrum.weatherforecast.base.BaseActivity;
@@ -37,6 +38,7 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
         NavController navController = Navigation.findNavController(this, R.id.nav_host);
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
         viewModel.initDAO(MainActivity.this);
+
     }
 
     @Override
@@ -54,7 +56,7 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                     viewModel.setFvLocationList();
                     viewModel.setSearchHistoryList();
                 } else {
-                    viewModel.setFvLocationList();
+                    viewModel.updateLocationListLocal();
                     viewModel.updateSearchHistoryListFromLocal();
                 }
             }
@@ -69,8 +71,6 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                 }
             }
         });
-
-
 
 
     }

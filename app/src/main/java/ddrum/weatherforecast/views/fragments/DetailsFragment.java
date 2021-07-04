@@ -47,33 +47,24 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         return new MainViewModel();
     }
 
-
     @Override
     protected void initView(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         onClickListener(binding.btnAddToList);
         init();
     }
+
     private void init() {
         hourlyWeatherAdapter = new HourlyWeatherAdapter(getContext());
         dailyWeatherAdapter = new DailyWeatherAdapter(getContext());
         binding.rcvWeatherHourly.setAdapter(hourlyWeatherAdapter);
         binding.rcvWeatherDaily.setAdapter(dailyWeatherAdapter);
-        if (getArguments() != null){
+        if (getArguments() != null) {
             cityId = getArguments().getString("cityId");
         }
     }
 
     @Override
     protected void initObserve() {
-        viewModel.oneCallWeather.observe(this, oneCallWeather -> {
-            if (oneCallWeather != null) {
-                List<OneCallWeather.Hourly> hourlyList = oneCallWeather.getHourly();
-                List<OneCallWeather.Daily> dailyList = oneCallWeather.getDaily();
-                hourlyWeatherAdapter.updateData(hourlyList);
-                dailyWeatherAdapter.updateData(dailyList);
-            }
-        });
-
         viewModel.simpleWeather.observe(getViewLifecycleOwner(), currentWeather -> {
             if (currentWeather != null) {
                 cityId = currentWeather.getId().toString();
@@ -85,20 +76,28 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
         viewModel.oneCallWeather.observe(getViewLifecycleOwner(), new Observer<OneCallWeather>() {
             @Override
             public void onChanged(OneCallWeather oneCallWeather) {
-                String description = oneCallWeather.getCurrent().getWeather().get(0).getDescription();
-                String temp = Math.round(oneCallWeather.getCurrent().getTemp()) + getString(R.string.tempUnit) + "C";
-                String feelsLike = Util.upperCaseFirstLetter("cảm giác như " + Math.round(oneCallWeather.getCurrent().getFeelsLike()) + "°") ;
-                String iconUrl = "http://openweathermap.org/img/wn/" + oneCallWeather.getCurrent().getWeather().get(0).getIcon() + "@2x.png";
-                binding.currentTvDescription.setText(description);
-                binding.currentTvTemp.setText(temp);
-                binding.currentTvFeelsLike.setText(feelsLike);
-                Glide.with(getActivity()).load(iconUrl).into(binding.currentIconWeather);
+                if (oneCallWeather != null) {
+                    List<OneCallWeather.Hourly> hourlyList = oneCallWeather.getHourly();
+                    List<OneCallWeather.Daily> dailyList = oneCallWeather.getDaily();
+                    hourlyWeatherAdapter.updateData(hourlyList);
+                    dailyWeatherAdapter.updateData(dailyList);
+
+                    String description = oneCallWeather.getCurrent().getWeather().get(0).getDescription();
+                    String temp = Math.round(oneCallWeather.getCurrent().getTemp()) + getString(R.string.tempUnit) + "C";
+                    String feelsLike = Util.upperCaseFirstLetter("cảm giác như " + Math.round(oneCallWeather.getCurrent().getFeelsLike()) + "°");
+                    String iconUrl = "http://openweathermap.org/img/wn/" + oneCallWeather.getCurrent().getWeather().get(0).getIcon() + "@2x.png";
+
+                    binding.currentTvDescription.setText(description);
+                    binding.currentTvTemp.setText(temp);
+                    binding.currentTvFeelsLike.setText(feelsLike);
+                    Glide.with(getActivity()).load(iconUrl).into(binding.currentIconWeather);
+                }
             }
         });
 
         viewModel.fvLocationList.observe(getViewLifecycleOwner(), list -> {
             if (list != null) {
-                if (containsCityId(list, cityId)) {
+                if (viewModel.containsCityId(list, cityId)) {
                     binding.btnAddToList.setVisibility(View.GONE);
                 } else {
                     binding.btnAddToList.setVisibility(View.VISIBLE);
@@ -106,10 +105,6 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
             }
         });
 
-    }
-
-    public synchronized boolean containsCityId(final List<FvLocation> list, final String cityId) {
-        return list.stream().anyMatch(o -> o.getCityId().equals(cityId));
     }
 
     @Override

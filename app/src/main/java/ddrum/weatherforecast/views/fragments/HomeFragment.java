@@ -57,7 +57,6 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
 
     @Override
     protected void initObserve() {
-
         viewModel.simpleWeatherList.observe(getViewLifecycleOwner(), list -> {
             if (list != null) {
                 adapter.updateData(list);
@@ -82,12 +81,10 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
             Glide.with(requireContext()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
         });
         viewModel.searchHistoryList.observe(getViewLifecycleOwner(), searchHistories -> {
-            suggestionAdapter.clear();
-            List<String> list = new ArrayList<>();
-            for (SearchHistory sh : searchHistories) {
-                list.add(sh.getText());
+            if(searchHistories !=null) {
+                suggestionAdapter.clear();
+                suggestionAdapter.addAll(Util.getTextList(searchHistories));
             }
-            suggestionAdapter.addAll(list);
         });
     }
 

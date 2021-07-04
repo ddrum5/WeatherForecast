@@ -24,6 +24,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import ddrum.weatherforecast.base.BaseViewModel;
@@ -54,7 +56,7 @@ public class MainViewModel extends BaseViewModel {
     public MutableLiveData<List<FvLocation>> fvLocationList = new MutableLiveData<>();
     public MutableLiveData<List<SearchHistory>> searchHistoryList = new MutableLiveData<>();
     private ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);
-    private FvLocationsDAO fvLocationsDAO;
+    public FvLocationsDAO fvLocationsDAO;
     private SearchHistoryDAO searchHistoryDAO;
 
 
@@ -65,23 +67,32 @@ public class MainViewModel extends BaseViewModel {
         updateSearchHistoryListFromLocal();
     }
 
-    public void updateLocationListLocal() {
-        if (fvLocationsDAO.getFvLocations().size() > 0) {
-            fvLocationList.setValue(fvLocationsDAO.getFvLocations());
+    public synchronized void updateLocationListLocal() {
+        List<FvLocation> list = fvLocationsDAO.getFvLocations();
+        if (list.size() > 0) {
+            fvLocationList.setValue(list);
         } else {
             fvLocationList.setValue(null);
         }
     }
 
-    public void updateSearchHistoryListFromLocal() {
-        searchHistoryList.setValue(searchHistoryDAO.getSearchHistoryList());
+    public synchronized void updateSearchHistoryListFromLocal() {
+        List<SearchHistory> list = searchHistoryDAO.getSearchHistoryList();
+        Collections.reverse(list);
+        searchHistoryList.setValue(list);
+
     }
 
     private void addSearchHistory(String text) {
         SearchHistory history = new SearchHistory(getUserId(), text);
+        List<SearchHistory> list = searchHistoryList.getValue();
         if (isLogged.getValue()) {
-            getRefSearch().document(text)
-                    .set(history);
+            if (list != null) {
+                if (!containsSearchList(list, text)) {
+                    getRefSearch().document(System.currentTimeMillis() + "")
+                            .set(history);
+                }
+            }
         } else {
             searchHistoryDAO.insert(history);
             updateSearchHistoryListFromLocal();
@@ -127,18 +138,14 @@ public class MainViewModel extends BaseViewModel {
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
-                        if (value != null) {
-                            List<SearchHistory> list = value.toObjects(SearchHistory.class);
-                            searchHistoryList.setValue(list);
-                        } else {
-                            searchHistoryList.setValue(null);
-                        }
+                        List<SearchHistory> list = value.toObjects(SearchHistory.class);
+                        searchHistoryList.setValue(list);
                     }
                 });
 
     }
 
-    public void setFvLocationList() {
+    public synchronized void setFvLocationList() {
         getRefLocations()
                 .whereEqualTo(Constant.USER_ID, getUserId())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -148,7 +155,7 @@ public class MainViewModel extends BaseViewModel {
                             List<FvLocation> list = value.toObjects(FvLocation.class);
                             if (list.size() > 0) {
                                 fvLocationList.setValue(list);
-                            }else {
+                            } else {
                                 fvLocationList.setValue(null);
                             }
                         }
@@ -168,6 +175,7 @@ public class MainViewModel extends BaseViewModel {
                         simpleWeatherList.setValue(list);
                     }
                 }
+
                 @Override
                 public void onFailure(Call<CurrentWeather> call, Throwable t) {
                     Log.e(TAG, "onFailure: ", t.getCause());
@@ -207,6 +215,28 @@ public class MainViewModel extends BaseViewModel {
         });
     }
 
+    public boolean checkCity;
+
+    public void checkCity(String cityName) {
+        addSearchHistory(cityName);
+        checkCity = false;
+        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
+            @Override
+            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+                CurrentWeather weather = response.body();
+                if (weather != null) {
+                    setWeatherDetail(weather.getId().toString());
+                    checkCity = true;
+                } else checkCity = false;
+            }
+
+            @Override
+            public void onFailure(Call<CurrentWeather> call, Throwable t) {
+                checkCity = false;
+            }
+        });
+    }
+
     public void setWeatherDetail(String cityId) {
         apiService.getWeatherByCityId(cityId).enqueue(new Callback<CurrentWeather>() {
             @Override
@@ -225,27 +255,12 @@ public class MainViewModel extends BaseViewModel {
         });
     }
 
-    public boolean checkCity;
+    public static boolean containsCityId(final List<FvLocation> list, final String cityId) {
+        return list.stream().anyMatch(o -> o.getCityId().equals(cityId));
+    }
 
-    public void checkCity(String cityName) {
-        addSearchHistory(cityName);
-        checkCity = false;
-        apiService.getWeatherByCityName(cityName).enqueue(new Callback<CurrentWeather>() {
-            @Override
-            public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-                CurrentWeather weather = response.body();
-                if (weather != null) {
-                    checkCity = true;
-                    simpleWeather.setValue(weather);
-                    setOneCallWeather(weather.getCoord().getLat().toString(), weather.getCoord().getLon().toString());
-                } else checkCity = false;
-            }
-
-            @Override
-            public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                checkCity = false;
-            }
-        });
+    private boolean containsSearchList(final List<SearchHistory> list, final String history) {
+        return list.stream().anyMatch(o -> o.getText().equals(history));
     }
 
 
