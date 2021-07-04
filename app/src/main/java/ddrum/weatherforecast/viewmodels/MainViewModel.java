@@ -50,10 +50,8 @@ public class MainViewModel extends BaseViewModel {
     public MutableLiveData<CurrentWeather> defaultWeather = new MutableLiveData<>();
     public MutableLiveData<CurrentWeather> simpleWeather = new MutableLiveData<>();
     public MutableLiveData<List<CurrentWeather>> simpleWeatherList = new MutableLiveData<>();
-    public MutableLiveData<List<CurrentWeather>> simpleWeatherListLocal = new MutableLiveData<>();
     public MutableLiveData<OneCallWeather> oneCallWeather = new MutableLiveData<>();
     public MutableLiveData<List<FvLocation>> fvLocationList = new MutableLiveData<>();
-    public MutableLiveData<List<FvLocation>> fvLocationListLocal = new MutableLiveData<>();
     public MutableLiveData<List<SearchHistory>> searchHistoryList = new MutableLiveData<>();
     private ApiService apiService = RetrofitInstance.getInstance().create(ApiService.class);
     private FvLocationsDAO fvLocationsDAO;
@@ -68,7 +66,11 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public void updateLocationListLocal() {
-        fvLocationListLocal.setValue(fvLocationsDAO.getFvLocations());
+        if (fvLocationsDAO.getFvLocations().size() > 0) {
+            fvLocationList.setValue(fvLocationsDAO.getFvLocations());
+        } else {
+            fvLocationList.setValue(null);
+        }
     }
 
     public void updateSearchHistoryListFromLocal() {
@@ -120,7 +122,7 @@ public class MainViewModel extends BaseViewModel {
         }
     }
 
-    public void setSearchHistoryList() {
+    public synchronized void setSearchHistoryList() {
         getRefSearch().whereEqualTo(Constant.USER_ID, getUserId())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -144,9 +146,11 @@ public class MainViewModel extends BaseViewModel {
                     public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
                         if (value != null) {
                             List<FvLocation> list = value.toObjects(FvLocation.class);
-                            fvLocationList.setValue(list);
-                        } else {
-                            fvLocationList.setValue(null);
+                            if (list.size() > 0) {
+                                fvLocationList.setValue(list);
+                            }else {
+                                fvLocationList.setValue(null);
+                            }
                         }
                     }
                 });
@@ -164,28 +168,6 @@ public class MainViewModel extends BaseViewModel {
                         simpleWeatherList.setValue(list);
                     }
                 }
-
-                @Override
-                public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                    Log.e(TAG, "onFailure: ", t.getCause());
-                }
-            });
-        }
-    }
-
-    public void setSimpleWeatherListLocal(List<FvLocation> fvLocations) {
-        List<CurrentWeather> list = new ArrayList<>();
-        for (FvLocation fv : fvLocations) {
-            apiService.getWeatherByCityId(fv.getCityId()).enqueue(new Callback<CurrentWeather>() {
-                @Override
-                public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-                    CurrentWeather currentWeather = response.body();
-                    if (currentWeather != null) {
-                        list.add(currentWeather);
-                        simpleWeatherListLocal.setValue(list);
-                    }
-                }
-
                 @Override
                 public void onFailure(Call<CurrentWeather> call, Throwable t) {
                     Log.e(TAG, "onFailure: ", t.getCause());
@@ -241,7 +223,6 @@ public class MainViewModel extends BaseViewModel {
                 simpleWeather.setValue(null);
             }
         });
-
     }
 
     public boolean checkCity;

@@ -22,7 +22,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/shadow"
                 app:mt_hint="Nhập tên thành phố"
-                app:mt_maxSuggestionsCount="5"
+                app:mt_maxSuggestionsCount="0"
                 app:mt_placeholder="Tìm kiếm" />
 
             <FrameLayout

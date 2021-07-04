@@ -28,19 +28,20 @@ public class BaseViewModel extends ViewModel {
     public MutableLiveData<Coord> currentLocation = new MutableLiveData<>();
 
 
-    public void initUser() {
+    public synchronized void initUser() {
         auth= FirebaseAuth.getInstance();
         updateUserState();
-        isLogged.setValue(user.getValue()!=null);
     }
     public String getUserId(){
         if (user.getValue()!=null) {
             return user.getValue().getUid();
         }
         return "";
+
     }
     public void updateUserState(){
         user.setValue(auth.getCurrentUser());
+        isLogged.setValue(user.getValue() !=null);
     }
 
     public void logout() {

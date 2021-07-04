@@ -61,11 +61,8 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
         viewModel.simpleWeatherList.observe(getViewLifecycleOwner(), list -> {
             if (list != null) {
                 adapter.updateData(list);
-            }
-        });
-        viewModel.simpleWeatherListLocal.observe(getViewLifecycleOwner(), list -> {
-            if (list != null) {
-                adapter.updateData(list);
+            } else {
+                adapter.clearData();
             }
         });
 

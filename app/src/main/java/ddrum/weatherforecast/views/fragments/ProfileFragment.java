@@ -69,6 +69,7 @@ public class ProfileFragment extends BaseFragment<MainViewModel, FragmentProfile
             case R.id.btnSignOut:
                 viewModel.logout();
                 viewModel.updateUserState();
+                viewModel.updateLocationListLocal();
                 shortSnackBar("Đã đăng xuất");
                 break;
         }

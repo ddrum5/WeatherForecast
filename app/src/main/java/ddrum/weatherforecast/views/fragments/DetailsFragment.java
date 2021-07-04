@@ -106,18 +106,9 @@ public class DetailsFragment extends BaseFragment<MainViewModel, FragmentDetails
             }
         });
 
-        viewModel.fvLocationListLocal.observe(getViewLifecycleOwner(), list -> {
-            if (list != null) {
-                if (containsCityId(list, cityId)) {
-                    binding.btnAddToList.setVisibility(View.GONE);
-                } else {
-                    binding.btnAddToList.setVisibility(View.VISIBLE);
-                }
-            }
-        });
     }
 
-    public boolean containsCityId(final List<FvLocation> list, final String cityId) {
+    public synchronized boolean containsCityId(final List<FvLocation> list, final String cityId) {
         return list.stream().anyMatch(o -> o.getCityId().equals(cityId));
     }
 

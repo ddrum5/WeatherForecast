@@ -65,5 +65,9 @@ public abstract class BaseAdapter<M, VH extends BaseViewHolder<B>, B extends Vie
         this.list = list;
         notifyDataSetChanged();
     }
+   public void clearData(){
+        this.list.clear();
+        notifyDataSetChanged();
+   }
 
 }
