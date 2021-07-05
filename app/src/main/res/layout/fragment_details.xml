@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:text="Cảm giác như 48°"
                 android:textSize="17sp" />
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_add_to_list"
                 android:text="Thêm vào danh sách"
                 android:layout_width="wrap_content"

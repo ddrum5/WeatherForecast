@@ -8,7 +8,8 @@
         android:orientation="vertical"
         android:padding="16dp"
         tools:context=".views.fragments.ProfileFragment">
-        <androidx.appcompat.widget.AppCompatButton
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSignIn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -19,29 +20,30 @@
             android:id="@+id/Logged"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
             android:visibility="visible">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvLoginSuccess"
+            <androidx.appcompat.widget.AppCompatImageView
+                android:src="@drawable/ic_profile"
+                android:adjustViewBounds="true"
+                android:maxWidth="100dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Đăng nhập thành công"
-                android:textSize="20sp" />
+                android:layout_height="wrap_content"/>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnSignOut"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="Đăng Xuất" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/email"
                 android:text="phãm@fgàml"
                 android:textSize="25sp"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSignOut"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="Đăng Xuất" />
         </LinearLayout>
     </FrameLayout>
 </layout>
