@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <LinearLayout
+        android:id="@+id/splashScreen"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="@drawable/shadow"
+        android:layout_height="match_parent">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_marginTop="100dp"
+            android:src="@drawable/logo_weather"
+            android:layout_width="wrap_content"
+            android:adjustViewBounds="true"
+            android:maxWidth="250dp"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:text="Dự báo thời tiết"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+</layout>

@@ -44,7 +44,7 @@ public class LoginFragment extends BaseFragment<AuthViewModel, FragmentLoginBind
                         viewModel.isLoginSuccessful.setValue(null);
                         shortSnackBar("Đăng nhập thành công");
                     } else {
-                        Toast.makeText(getActivity(), "Sai tài khoản hoặc mật khẩu!", Toast.LENGTH_SHORT).show();
+                        shortSnackBar("Sai tài khoản mặc mật khẩu");
                     }
             }
         });

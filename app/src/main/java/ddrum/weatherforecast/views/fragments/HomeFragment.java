@@ -65,19 +65,21 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
             }
         });
         viewModel.defaultWeather.observe(getViewLifecycleOwner(), currentWeather -> {
-            String cityName = currentWeather.getName();
-            String description = currentWeather.getWeather().get(0).getDescription();
-            String temp = Math.round(currentWeather.getMain().getTemp()) + getString(R.string.tempUnit);
-            String tempMinMax = "t:" + Math.round(currentWeather.getMain().getTempMin())
-                    + " c:" + Math.round(currentWeather.getMain().getTempMax());
-            String iconUrl = "http://openweathermap.org/img/wn/" + currentWeather.getWeather().get(0).getIcon() + "@2x.png";
+            if (currentWeather != null) {
+                String cityName = currentWeather.getName();
+                String description = currentWeather.getWeather().get(0).getDescription();
+                String temp = Math.round(currentWeather.getMain().getTemp()) + getString(R.string.tempUnit);
+                String tempMinMax = "t:" + Math.round(currentWeather.getMain().getTempMin())
+                        + " c:" + Math.round(currentWeather.getMain().getTempMax());
+                String iconUrl = "http://openweathermap.org/img/wn/" + currentWeather.getWeather().get(0).getIcon() + "@2x.png";
 
-            binding.currentWeather.currentTvCityName.setText(cityName);
-            binding.currentWeather.currentTvDescription.setText(description);
-            binding.currentWeather.currentTvTemp.setText(temp);
-            binding.currentWeather.currentTvTempMinMax.setText(tempMinMax);
-            binding.currentWeather.time.setText(Util.getCurrentTime());
-            Glide.with(requireContext()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
+                binding.currentWeather.currentTvCityName.setText(cityName);
+                binding.currentWeather.currentTvDescription.setText(description);
+                binding.currentWeather.currentTvTemp.setText(temp);
+                binding.currentWeather.currentTvTempMinMax.setText(tempMinMax);
+                binding.currentWeather.time.setText(Util.getCurrentTime());
+                Glide.with(requireContext()).load(iconUrl).into(binding.currentWeather.currentIconWeather);
+            }
         });
         viewModel.searchHistoryList.observe(getViewLifecycleOwner(), searchHistories -> {
             if (searchHistories != null) {
@@ -92,12 +94,9 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
         binding.swiperFresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Coord coord = viewModel.currentLocation.getValue();
-                if (coord != null)
-                    viewModel.setDefaultWeather(coord.getLat().toString(), coord.getLon().toString());
-
-                binding.currentWeather.time.setText(getCurrentTime());
-                Snackbar.make(getView(), "Đã cập nhật lúc " + getCurrentTime(), Snackbar.LENGTH_SHORT).show();
+                viewModel.refreshCurrentLocation();
+                viewModel.refreshSimpleList();
+                shortSnackBar("Đã cập nhật lúc " + getCurrentTime());
                 binding.swiperFresh.setRefreshing(false);
             }
         });
@@ -125,7 +124,6 @@ public class HomeFragment extends BaseFragment<MainViewModel, FragmentHomeBindin
                 goToDetail(viewModel.defaultWeather.getValue().getId().toString());
             }
         });
-
     }
 
     private void goToDetail(String cityId) {

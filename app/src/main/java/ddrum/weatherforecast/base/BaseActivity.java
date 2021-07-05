@@ -6,13 +6,16 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MotionEvent;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.LocationListener;
@@ -22,7 +25,7 @@ import ddrum.weatherforecast.models.Coord;
 public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataBinding> extends AppCompatActivity implements LocationListener {
 
     private LocationManager locationManager;
-    private Boolean isAccessLocation = false;
+    protected Boolean isAccessLocation = false;
 
     protected abstract int getLayout();
 
@@ -47,8 +50,8 @@ public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataB
         }
         initView(savedInstanceState);
         initObserve();
-    }
 
+    }
 
     protected void getLocationService() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -67,7 +70,6 @@ public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataB
         Double lat = location.getLatitude();
         Double lon = location.getLongitude();
         viewModel.currentLocation.setValue(new Coord(lat,lon));
-
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -76,4 +78,5 @@ public abstract class BaseActivity<VM extends BaseViewModel, B extends ViewDataB
         }
         return super.onTouchEvent(event);
     }
+
 }

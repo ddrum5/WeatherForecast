@@ -10,22 +10,20 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/daily_tv_day"
-            android:layout_width="wrap_content"
+            android:layout_width="75dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:text="Chủ nhật"
             android:textSize="17sp" />
 
-        <LinearLayout
-            android:id="@+id/layout"
-            android:layout_centerInParent="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/daily_icon_weather"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/daily_tv_day"
+                android:layout_marginLeft="40dp"
                 android:adjustViewBounds="true"
                 android:maxWidth="50dp"
                 android:src="@drawable/icon_sun" />
@@ -40,11 +38,11 @@
                 android:autoSizeTextType="uniform"
                 android:breakStrategy="balanced"
                 android:ellipsize="end"
-                android:maxEms="4"
+                android:maxWidth="70dp"
                 android:maxLines="2"
                 android:text="Mây đen u ám xịt haha"
                 android:textSize="13sp" />
-        </LinearLayout>
+
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/daily_tv_Temp_Min_Max"

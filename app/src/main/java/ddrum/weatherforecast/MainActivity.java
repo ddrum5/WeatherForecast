@@ -1,6 +1,7 @@
 package ddrum.weatherforecast;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
@@ -38,7 +39,6 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
         NavController navController = Navigation.findNavController(this, R.id.nav_host);
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
         viewModel.initDAO(MainActivity.this);
-
     }
 
     @Override
@@ -49,6 +49,7 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                 viewModel.setDefaultWeather(coord.getLat().toString(), coord.getLon().toString());
             }
         });
+
         viewModel.isLogged.observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
@@ -71,7 +72,6 @@ public class MainActivity extends BaseActivity<MainViewModel, ActivityMainBindin
                 }
             }
         });
-
 
     }
 

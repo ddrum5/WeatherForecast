@@ -21,7 +21,6 @@ import ddrum.weatherforecast.models.Coord;
 
 public class BaseViewModel extends ViewModel {
 
-
     protected FirebaseAuth auth= FirebaseAuth.getInstance();
     public MutableLiveData<FirebaseUser> user = new MutableLiveData<>();
     public MutableLiveData<Boolean> isLogged = new MutableLiveData<>();

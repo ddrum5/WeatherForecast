@@ -41,10 +41,11 @@ public class RegisterFragment extends BaseFragment<AuthViewModel, FragmentRegist
             public void onChanged(Boolean isLoginSuccessful) {
                 if (isLoginSuccessful!=null)
                     if (isLoginSuccessful) {
+                        shortSnackBar("Đăng ký thành công");
                         navigateTo(R.id.profileFragment);
                         viewModel.isLoginSuccessful.setValue(null);
                     } else {
-                        Toast.makeText(getContext(), "Có lỗi", Toast.LENGTH_SHORT).show();
+                        shortSnackBar("có lỗi");
                     }
             }
         });

@@ -1,6 +1,7 @@
 package ddrum.weatherforecast.viewmodels;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -59,7 +60,6 @@ public class MainViewModel extends BaseViewModel {
     public FvLocationsDAO fvLocationsDAO;
     private SearchHistoryDAO searchHistoryDAO;
 
-
     public void initDAO(Context context) {
         fvLocationsDAO = DatabaseInstance.getInstance(context).fvLocationsDAO();
         searchHistoryDAO = DatabaseInstance.getInstance(context).searchHistoryDAO();
@@ -68,22 +68,27 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public synchronized void updateLocationListLocal() {
-        List<FvLocation> list = fvLocationsDAO.getFvLocations();
-        if (list.size() > 0) {
-            fvLocationList.setValue(list);
-        } else {
-            fvLocationList.setValue(null);
-        }
+        if (isLogged.getValue() != null)
+            if (!isLogged.getValue()) {
+                List<FvLocation> list = fvLocationsDAO.getFvLocations();
+                if (list.size() > 0) {
+                    fvLocationList.setValue(list);
+                } else {
+                    fvLocationList.setValue(null);
+                }
+            }
     }
 
     public synchronized void updateSearchHistoryListFromLocal() {
         List<SearchHistory> list = searchHistoryDAO.getSearchHistoryList();
-        Collections.reverse(list);
         searchHistoryList.setValue(list);
 
     }
 
     private void addSearchHistory(String text) {
+        if (TextUtils.isEmpty(text)) {
+            return;
+        }
         SearchHistory history = new SearchHistory(getUserId(), text);
         List<SearchHistory> list = searchHistoryList.getValue();
         if (isLogged.getValue()) {
@@ -146,42 +151,61 @@ public class MainViewModel extends BaseViewModel {
     }
 
     public synchronized void setFvLocationList() {
-        getRefLocations()
-                .whereEqualTo(Constant.USER_ID, getUserId())
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
-                        if (value != null) {
-                            List<FvLocation> list = value.toObjects(FvLocation.class);
-                            if (list.size() > 0) {
-                                fvLocationList.setValue(list);
-                            } else {
-                                fvLocationList.setValue(null);
+        if (isLogged.getValue() != null)
+            if (isLogged.getValue()) {
+                getRefLocations()
+                        .whereEqualTo(Constant.USER_ID, getUserId())
+                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
+                                if (value != null) {
+                                    List<FvLocation> list = value.toObjects(FvLocation.class);
+                                    if (list.size() > 0) {
+                                        fvLocationList.setValue(list);
+                                    } else {
+                                        fvLocationList.setValue(null);
+                                    }
+                                }
                             }
-                        }
-                    }
-                });
+                        });
+            }
+    }
+
+    public void refreshSimpleList() {
+        setSimpleWeatherList(fvLocationList.getValue());
+    }
+
+    public void refreshCurrentLocation() {
+        Coord coord = currentLocation.getValue();
+        if (coord != null)
+            setDefaultWeather(coord.getLat().toString(), coord.getLon().toString());
     }
 
     public void setSimpleWeatherList(List<FvLocation> fvLocations) {
-        List<CurrentWeather> list = new ArrayList<>();
-        for (FvLocation fv : fvLocations) {
-            apiService.getWeatherByCityId(fv.getCityId()).enqueue(new Callback<CurrentWeather>() {
-                @Override
-                public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
-                    CurrentWeather currentWeather = response.body();
-                    if (currentWeather != null) {
-                        list.add(currentWeather);
-                        simpleWeatherList.setValue(list);
+        if (fvLocations!=null){
+            List<CurrentWeather> list = new ArrayList<>();
+            simpleWeatherList.setValue(null);
+            for (FvLocation fv : fvLocations) {
+                apiService.getWeatherByCityId(fv.getCityId()).enqueue(new Callback<CurrentWeather>() {
+                    @Override
+                    public void onResponse(Call<CurrentWeather> call, Response<CurrentWeather> response) {
+                        CurrentWeather currentWeather = response.body();
+                        if (currentWeather != null) {
+                            list.add(currentWeather);
+                            simpleWeatherList.setValue(list);
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<CurrentWeather> call, Throwable t) {
-                    Log.e(TAG, "onFailure: ", t.getCause());
-                }
-            });
+                    @Override
+                    public void onFailure(Call<CurrentWeather> call, Throwable t) {
+                        Log.e(TAG, "onFailure: ", t.getCause());
+                    }
+                });
+            }
+        } else {
+            simpleWeatherList.setValue(null);
         }
+
     }
 
     public void setDefaultWeather(String lat, String lon) {
